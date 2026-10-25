@@ -1,0 +1,2619 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Outils assistant monteur · Joël Li</title>
+<meta name="author" content="Joël Li">
+<meta name="copyright" content="© 2026 Joël Li. Tous droits réservés.">
+<meta name="description" content="Outils pour assistants monteurs Avid : Marker VFX Traceur, Marker Diff, EDL to SubCap, Codec Size. Tout se passe dans le navigateur.">
+<meta name="referrer" content="no-referrer">
+<style>
+:root{--bg:#eef1f5;--surface:#fff;--surface-2:#e5e9ef;--ink:#141922;--muted:#566275;--line:#cfd6e0;--accent:#2447d6;--on-accent:#fff;color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root{--bg:#10141a;--surface:#171d25;--surface-2:#212934;--ink:#e7ebf1;--muted:#98a3b4;--line:#2b3441;--accent:#86a1ff;--on-accent:#0a1020}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.tabbar{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--line);padding:0 max(16px,env(safe-area-inset-left)) 0 max(16px,env(safe-area-inset-right))}
+.bar{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.tabs{display:flex;gap:4px;overflow-x:auto;flex:1;min-width:0}
+.tab small{font:500 10px/1 system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-left:6px;padding:2px 5px;border:1px solid var(--line);border-radius:3px;vertical-align:1px}
+.ext{flex:none;display:flex;align-items:center;gap:8px;font:500 11px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--muted);opacity:.8;padding:6px 0}
+.ext a{color:inherit;text-decoration:none;border:1px solid var(--line);border-radius:3px;padding:3px 6px}
+.ext a:hover{color:var(--accent);border-color:var(--accent)}
+.tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);font:600 14px/1 system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:.03em;padding:15px 14px 12px;cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.panel{display:none}
+.panel.on{display:block}
+@media (max-width:640px){.ext{display:none}.tab{padding:14px 12px 11px}}
+.site-foot{border-top:1px solid var(--line);margin-top:8px;padding:20px max(16px,env(safe-area-inset-left)) 28px max(16px,env(safe-area-inset-right));color:var(--muted);font-size:12.5px}
+.site-foot .in{max-width:1100px;margin:0 auto;display:grid;gap:6px}
+.site-foot p{margin:0;max-width:95ch}
+.site-foot strong{color:var(--ink);font-weight:600}
+.legal-btn{appearance:none;background:none;border:0;padding:0;font:inherit;color:var(--muted);text-decoration:underline;cursor:pointer}
+.legal-btn:hover{color:var(--accent)}
+.legal-btn:focus-visible,.dlg-x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+dialog#legal{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:0;width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 48px);overflow:auto}
+dialog#legal::backdrop{background:rgba(10,14,20,.55)}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+.dlg-head h2{margin:0;font:700 17px/1.2 system-ui,-apple-system,'Segoe UI',sans-serif}
+.dlg-x{appearance:none;background:none;border:0;color:var(--muted);font-size:26px;line-height:1;cursor:pointer;padding:2px 8px;border-radius:4px}
+.dlg-x:hover{color:var(--ink);background:var(--surface-2)}
+.dlg-body{padding:6px 18px 18px;font-size:14px;line-height:1.55}
+.dlg-body p{margin:12px 0 0}
+iframe{display:block;width:100%;border:0;background:transparent;min-height:70vh}
+</style>
+</head>
+<body>
+<nav class="tabbar" aria-label="Outils"><div class="bar"><div class="tabs" role="tablist">
+<button class="tab" role="tab" id="t-mt" aria-controls="p-mt" aria-selected="true">Marker VFX Traceur<small>EDL</small></button>
+<button class="tab" role="tab" id="t-md" aria-controls="p-md" aria-selected="false">Marker Diff<small>TXT</small></button>
+<button class="tab" role="tab" id="t-edl" aria-controls="p-edl" aria-selected="false">EDL to SubCap</button>
+<button class="tab" role="tab" id="t-cs" aria-controls="p-cs" aria-selected="false">Codec Size</button>
+</div><span class="ext"><span class="by">by Joël Li</span><a href="https://www.imdb.com/fr/name/nm9282378" target="_blank" rel="noopener noreferrer">IMDb ↗</a></span></div></nav>
+<section class="panel on" id="p-mt" role="tabpanel" aria-labelledby="t-mt"><iframe title="Marker VFX Traceur" allow="clipboard-write" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;title&gt;Marker VFX Traceur&lt;/title&gt;&lt;meta charset=utf8&gt;&lt;meta name=viewport content=&quot;width=device-width,initial-scale=1,viewport-fit=cover&quot;&gt;&lt;style&gt;:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}&lt;/style&gt;&lt;style&gt;textarea::placeholder{white-space:pre-wrap;overflow-wrap:anywhere}textarea{min-height:110px !important}.wrap{grid-template-columns:minmax(0,1fr)}.wrap&gt;*{min-width:0}th,td{padding-left:8px !important;padding-right:8px !important}td.comment{min-width:200px !important}td.clip{max-width:140px !important}th{letter-spacing:.03em !important}td.tc,td.id{font-size:12.5px !important}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+
+&lt;meta name=&quot;claude:viewport-fit-sides&quot; content=&quot;cover&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Barlow+Condensed:wght@600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap&quot;&gt;
+&lt;style&gt;
+/* Layout concept: a turnover change-list sheet. Two EDL &quot;reels&quot; (old / new sequence), a strip of options,
+   status cards with their share of the total, then a ruled table anchored on source timecode. */
+:root {
+  --font-display: &quot;Barlow Condensed&quot;, &quot;Arial Narrow&quot;, &quot;Helvetica Neue&quot;, sans-serif;
+  --font-body: &quot;Barlow&quot;, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif;
+  --font-mono: &quot;IBM Plex Mono&quot;, ui-monospace, Menlo, Consolas, monospace;
+
+  --bg: #eef1f5;
+  --surface: #ffffff;
+  --surface-2: #e5e9ef;
+  --ink: #141922;
+  --muted: #566275;
+  --line: #cfd6e0;
+  --accent: #2447d6;
+  --on-accent: #ffffff;
+
+  --removed: #b3261e;  --removed-bg: #fbe7e5;
+  --added: #17743a;    --added-bg: #e2f4e8;
+  --moved: #9a5400;    --moved-bg: #fdefd8;
+  --modified: #6637c2; --modified-bg: #eee7fb;
+  --same: #566275;     --same-bg: #e5e9ef;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme=&quot;light&quot;]) {
+    --bg: #10141a; --surface: #171d25; --surface-2: #212934; --ink: #e7ebf1; --muted: #98a3b4; --line: #2b3441;
+    --accent: #86a1ff; --on-accent: #0a1020;
+    --removed: #ff8f86;  --removed-bg: #3a1d20;
+    --added: #72d68f;    --added-bg: #15301f;
+    --moved: #f4b862;    --moved-bg: #372911;
+    --modified: #bba2ff; --modified-bg: #2a2148;
+    --same: #98a3b4;     --same-bg: #212934;
+    color-scheme: dark;
+  }
+}
+:root[data-theme=&quot;dark&quot;] {
+  --bg: #10141a; --surface: #171d25; --surface-2: #212934; --ink: #e7ebf1; --muted: #98a3b4; --line: #2b3441;
+  --accent: #86a1ff; --on-accent: #0a1020;
+  --removed: #ff8f86;  --removed-bg: #3a1d20;
+  --added: #72d68f;    --added-bg: #15301f;
+  --moved: #f4b862;    --moved-bg: #372911;
+  --modified: #bba2ff; --modified-bg: #2a2148;
+  --same: #98a3b4;     --same-bg: #212934;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--font-body);
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 22px; }
+h1, h2 { font-family: var(--font-display); font-weight: 700; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; }
+h2 { font-size: 1.25rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.kicker { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.lede { max-width: 68ch; color: var(--muted); margin: 12px 0 0; }
+.head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); gap: 16px 28px; align-items: start; }
+@media (max-width: 760px) { .head { grid-template-columns: 1fr; } }
+.fmt { margin: 6px 0 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); font: 400 12.5px/1.5 var(--font-mono); color: var(--muted); }
+.fmt strong { color: var(--ink); font-weight: 500; }
+.fmt code { font: inherit; color: var(--ink); }
+
+.inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+.reel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; display: grid; gap: 10px; padding: 14px; min-width: 0; }
+.reel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.reel-head h2 { display: flex; align-items: center; gap: 10px; }
+.tag { font: 500 11px/1 var(--font-mono); letter-spacing: 0.06em; padding: 4px 6px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); }
+textarea { width: 100%; min-height: 170px; resize: vertical; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 10px; font: 400 12.5px/1.5 var(--font-mono); white-space: pre; overflow: auto; }
+textarea:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible, .filebtn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.info { margin: 0; font: 400 12.5px/1.4 var(--font-mono); color: var(--muted); min-height: 1.4em; }
+.info.warn { color: var(--removed); }
+.fname { margin: 0; font: 400 12px/1.3 var(--font-mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fname strong { color: var(--ink); font-weight: 500; }
+
+button, .filebtn { font: 600 13px/1 var(--font-body); letter-spacing: 0.03em; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 9px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+button:hover, .filebtn:hover { background: var(--surface-2); }
+.filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.filebtn { position: relative; }
+button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+button.primary:hover { filter: brightness(1.08); background: var(--accent); }
+.hint { margin: 8px 0 0; min-height: 2.8em; padding: 8px 12px; border-left: 3px solid var(--accent, #2447d6); background: color-mix(in srgb, var(--accent, #2447d6) 8%, transparent); color: var(--ink); font-size: 13px; border-radius: 0 6px 6px 0; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.options { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: end; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field label { font: 500 11px/1 var(--font-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+select, input[type=&quot;text&quot;], input[type=&quot;number&quot;] { background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; font: 400 13px/1.2 var(--font-mono); min-width: 0; }
+input[type=&quot;text&quot;] { width: min(100%, 220px); }
+input[type=&quot;number&quot;] { width: 84px; }
+input:disabled, select:disabled { opacity: 0.5; }
+.options .spacer { flex: 1 1 0; }
+
+.colorbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
+.colorbar .lab { font: 500 11px/1 var(--font-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.colors { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+.check { display: inline-flex; align-items: center; gap: 7px; font: 400 13px/1.2 var(--font-body); color: var(--ink); cursor: pointer; }
+.check input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+
+.summary { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.chip { flex: 1 1 150px; display: grid; grid-template-columns: 1fr auto; column-gap: 10px; row-gap: 3px; align-items: start; text-align: left; padding: 10px 12px; border-radius: 5px; border: 1px solid transparent; background: var(--chip-bg); color: var(--chip-fg); opacity: 0.55; }
+.chip:hover { background: var(--chip-bg); filter: brightness(0.97); }
+.chip[aria-pressed=&quot;true&quot;] { opacity: 1; border-color: var(--chip-fg); }
+.chip[data-s=&quot;cut&quot;], .chip[data-s=&quot;newshot&quot;] { border-style: dashed; }
+.chip .l { grid-column: 1; grid-row: 1; font: 500 11px/1.1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+.chip .p { grid-column: 1; grid-row: 2; font: 400 11px/1.2 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip .n { grid-column: 2; grid-row: 1 / span 2; align-self: center; font: 700 2rem/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.chip .track { grid-column: 1 / -1; grid-row: 3; margin-top: 8px; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--chip-fg) 22%, transparent); overflow: hidden; }
+.chip .fill { display: block; height: 100%; background: var(--chip-fg); border-radius: 2px; }
+.chip[data-s=&quot;removed&quot;], .chip[data-s=&quot;cut&quot;], .pill[data-s=&quot;removed&quot;], .pill[data-s=&quot;cut&quot;] { --chip-bg: var(--removed-bg); --chip-fg: var(--removed); }
+.chip[data-s=&quot;added&quot;], .chip[data-s=&quot;newshot&quot;], .pill[data-s=&quot;added&quot;], .pill[data-s=&quot;newshot&quot;] { --chip-bg: var(--added-bg); --chip-fg: var(--added); }
+.chip[data-s=&quot;moved&quot;], .pill[data-s=&quot;moved&quot;] { --chip-bg: var(--moved-bg); --chip-fg: var(--moved); }
+.chip[data-s=&quot;modified&quot;], .pill[data-s=&quot;modified&quot;] { --chip-bg: var(--modified-bg); --chip-fg: var(--modified); }
+.chip[data-s=&quot;same&quot;], .pill[data-s=&quot;same&quot;] { --chip-bg: var(--same-bg); --chip-fg: var(--same); }
+
+.tablewrap { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: auto; max-height: min(62vh, 620px); }
+table { border-collapse: collapse; width: 100%; min-width: 1060px; }
+th { text-align: left; font: 500 11px/1 var(--font-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding: 11px 12px; box-shadow: inset 0 -2px 0 var(--ink); background: var(--surface); position: sticky; top: 0; z-index: 1; white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.tc { font: 400 13px/1.4 var(--font-mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.id { font: 500 13px/1.4 var(--font-mono); white-space: nowrap; }
+td.comment { min-width: 240px; }
+td.clip { font: 400 12.5px/1.4 var(--font-mono); max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill { display: inline-block; font: 500 11px/1 var(--font-mono); letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 6px; border-radius: 3px; border: 1px solid transparent; background: var(--chip-bg); color: var(--chip-fg); white-space: nowrap; }
+.pill[data-s=&quot;cut&quot;], .pill[data-s=&quot;newshot&quot;] { border-style: dashed; border-color: var(--chip-fg); }
+.dim { color: var(--muted); }
+.btn-holo { position: relative; color: #0b1020; border: 0; padding: 10px 14px; overflow: hidden; isolation: isolate;
+  --holo: linear-gradient(115deg, #7df9ff, #b7a6ff 22%, #ff9bd8 42%, #ffe9a6 60%, #9bffc6 80%, #7df9ff); background: var(--holo);
+  background-size: 250% 100%; background-position: 0 0; box-shadow: 0 0 0 1px rgba(255,255,255,.55) inset, 0 4px 18px rgba(150,130,255,.35); }
+.btn-holo::before { content: &quot;&quot;; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.75) 50%, transparent 65%); background-size: 250% 100%; background-position: 150% 0; opacity: 0; }
+.btn-holo:hover, .btn-holo:focus-visible { filter: saturate(1.25) brightness(1.05); background: var(--holo); background-size: 250% 100%; animation: holo 6s linear infinite; }
+.btn-holo:hover::before, .btn-holo:focus-visible::before { opacity: 1; animation: holo-shine 3.2s ease-in-out infinite; }
+.btn-holo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@keyframes holo { to { background-position: 250% 0; } }
+@keyframes holo-shine { 0% { background-position: 150% 0; } 60%, 100% { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .btn-holo:hover, .btn-holo:focus-visible, .btn-holo:hover::before, .btn-holo:focus-visible::before { animation: none; } }
+.btn-violet { background: var(--modified-bg); color: var(--modified); border-color: var(--modified); }
+.note.conflict { color: var(--removed); font-weight: 600; }
+.note.edit { color: var(--moved); }
+.note.edit.over { color: var(--removed); font-weight: 600; }
+.note { display: block; font: 400 12px/1.3 var(--font-mono); color: var(--muted); margin-top: 3px; }
+del { color: var(--muted); text-decoration-thickness: 1px; }
+ins { text-decoration: none; background: var(--modified-bg); color: var(--ink); padding: 0 2px; border-radius: 2px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--line); margin-right: 6px; vertical-align: -1px; }
+.empty { padding: 28px 16px; color: var(--muted); text-align: center; }
+
+.export { display: grid; gap: 10px; }
+.export p.short { font: 400 12px/1.4 var(--font-mono); }
+.export p { margin: 0; color: var(--muted); max-width: 72ch; }
+#outWrap { display: grid; gap: 6px; }
+#outText { min-height: 130px; }
+.foot { color: var(--muted); font-size: 13px; max-width: 80ch; display: grid; gap: 8px; }
+.foot p { margin: 0; }
+@media (prefers-reduced-motion: no-preference) { button, .chip { transition: background 0.12s, opacity 0.12s; } }
+&lt;/style&gt;
+
+&lt;main class=&quot;wrap&quot;&gt;
+  &lt;header class=&quot;head&quot;&gt;
+   &lt;div&gt;
+    &lt;p class=&quot;kicker&quot;&gt;Assistant monteur · Avid Media Composer&lt;/p&gt;
+    &lt;h1&gt;Marker VFX Traceur&lt;/h1&gt;
+    &lt;p class=&quot;lede&quot;&gt;Colle ou charge l&#x27;EDL de l&#x27;ancienne séquence et celui de la nouvelle séquence. Chaque marker est suivi grâce au clip sur lequel il se trouve et à son timecode source. L&#x27;outil indique ce qui a changé, même quand le montage a décalé toute la timeline, et permet de replacer en tête de clip les markers VFX qui manquent.&lt;/p&gt;
+   &lt;/div&gt;
+   &lt;aside class=&quot;fmt&quot; aria-label=&quot;EDL attendu&quot;&gt;&lt;strong&gt;EDL attendu :&lt;/strong&gt; CMX3600, exporté depuis Avid (EDL Manager) avec les noms de clips source et les markers activés dans les options. Le fichier doit contenir des lignes &lt;code&gt;* FROM CLIP NAME:&lt;/code&gt; et &lt;code&gt;* LOC:&lt;/code&gt;.&lt;/aside&gt;
+  &lt;/header&gt;
+
+  &lt;section class=&quot;inputs&quot; aria-label=&quot;EDL des deux séquences&quot;&gt;
+    &lt;div class=&quot;reel&quot;&gt;
+      &lt;div class=&quot;reel-head&quot;&gt;
+        &lt;h2&gt;&lt;span class=&quot;tag&quot;&gt;OLD&lt;/span&gt; Ancienne séquence&lt;/h2&gt;
+        &lt;div class=&quot;actions&quot;&gt;
+          &lt;label class=&quot;filebtn&quot;&gt;Charger un .edl&lt;input type=&quot;file&quot; id=&quot;oldFile&quot; accept=&quot;.edl,.txt,text/plain&quot;&gt;&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;p class=&quot;fname&quot; id=&quot;oldName&quot; hidden&gt;&lt;/p&gt;
+      &lt;textarea id=&quot;oldText&quot; spellcheck=&quot;false&quot; aria-label=&quot;EDL de l&#x27;ancienne séquence&quot; placeholder=&quot;Colle ici l&#x27;EDL CMX3600 de l&#x27;ancienne séquence (les lignes * LOC: portent les markers)&quot;&gt;&lt;/textarea&gt;
+      &lt;p class=&quot;info&quot; id=&quot;oldInfo&quot;&gt;&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;reel&quot;&gt;
+      &lt;div class=&quot;reel-head&quot;&gt;
+        &lt;h2&gt;&lt;span class=&quot;tag&quot;&gt;NEW&lt;/span&gt; Nouvelle séquence&lt;/h2&gt;
+        &lt;div class=&quot;actions&quot;&gt;
+          &lt;label class=&quot;filebtn&quot;&gt;Charger un .edl&lt;input type=&quot;file&quot; id=&quot;newFile&quot; accept=&quot;.edl,.txt,text/plain&quot;&gt;&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;p class=&quot;fname&quot; id=&quot;newName&quot; hidden&gt;&lt;/p&gt;
+      &lt;textarea id=&quot;newText&quot; spellcheck=&quot;false&quot; aria-label=&quot;EDL de la nouvelle séquence&quot; placeholder=&quot;Colle ici l&#x27;EDL CMX3600 de la nouvelle séquence&quot;&gt;&lt;/textarea&gt;
+      &lt;p class=&quot;info&quot; id=&quot;newInfo&quot;&gt;&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;options&quot; aria-label=&quot;Réglages&quot;&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;fps&quot;&gt;Cadence&lt;/label&gt;
+      &lt;select id=&quot;fps&quot;&gt;
+        &lt;option value=&quot;23.976&quot;&gt;23.976&lt;/option&gt;
+        &lt;option value=&quot;24&quot; selected&gt;24&lt;/option&gt;
+        &lt;option value=&quot;25&quot;&gt;25&lt;/option&gt;
+        &lt;option value=&quot;29.97&quot;&gt;29.97&lt;/option&gt;
+        &lt;option value=&quot;30&quot;&gt;30&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;clipMode&quot;&gt;Identifier le plan par&lt;/label&gt;
+      &lt;select id=&quot;clipMode&quot;&gt;
+        &lt;option value=&quot;clip&quot; selected&gt;Nom du clip&lt;/option&gt;
+        &lt;option value=&quot;reel&quot;&gt;Reel&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;tol&quot;&gt;Tolérance source (images)&lt;/label&gt;
+      &lt;input type=&quot;number&quot; id=&quot;tol&quot; value=&quot;0&quot; min=&quot;0&quot; step=&quot;1&quot; inputmode=&quot;numeric&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;keyMode&quot;&gt;Associer les markers par&lt;/label&gt;
+      &lt;select id=&quot;keyMode&quot;&gt;
+        &lt;option value=&quot;id&quot;&gt;ID dans le commentaire&lt;/option&gt;
+        &lt;option value=&quot;comment&quot;&gt;Commentaire entier&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;idPreset&quot;&gt;Format de l&#x27;ID&lt;/label&gt;
+      &lt;select id=&quot;idPreset&quot;&gt;
+        &lt;option value=&quot;\d{3}-\d{3}&quot; selected&gt;001-010&lt;/option&gt;
+        &lt;option value=&quot;[A-Za-z]{2,6}[_-]\d{3}[_-]\d{3}&quot;&gt;ADV-001-010&lt;/option&gt;
+        &lt;option value=&quot;&quot;&gt;Personnalisé&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;idRegex&quot;&gt;Motif de l&#x27;ID (regex)&lt;/label&gt;
+      &lt;input type=&quot;text&quot; id=&quot;idRegex&quot; value=&quot;\d{3}-\d{3}&quot; spellcheck=&quot;false&quot; autocomplete=&quot;off&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;handles&quot;&gt;Poignées (images, 0 = aucune alerte)&lt;/label&gt;
+      &lt;input type=&quot;number&quot; id=&quot;handles&quot; value=&quot;24&quot; min=&quot;0&quot; step=&quot;1&quot; inputmode=&quot;numeric&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;placement&quot;&gt;Replacer les markers manquants&lt;/label&gt;
+      &lt;select id=&quot;placement&quot;&gt;
+        &lt;option value=&quot;head&quot; selected&gt;En tête de clip (VFX)&lt;/option&gt;
+        &lt;option value=&quot;src&quot;&gt;Sur leur image source&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;spacer&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;actions&quot;&gt;
+      &lt;button type=&quot;button&quot; id=&quot;runBtn&quot; class=&quot;primary&quot;&gt;Comparer&lt;/button&gt;
+      &lt;button type=&quot;button&quot; id=&quot;demoBtn&quot;&gt;Exemple&lt;/button&gt;
+      &lt;button type=&quot;button&quot; id=&quot;clearBtn&quot;&gt;Vider&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;colorbar&quot; id=&quot;colorBar&quot; aria-label=&quot;Filtre par couleur&quot; hidden&gt;
+    &lt;span class=&quot;lab&quot;&gt;Couleurs de markers à inclure&lt;/span&gt;
+    &lt;div class=&quot;colors&quot; id=&quot;colorList&quot;&gt;&lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section aria-label=&quot;Résumé&quot;&gt;&lt;div class=&quot;summary&quot; id=&quot;summary&quot;&gt;&lt;/div&gt;&lt;/section&gt;
+
+  &lt;section aria-label=&quot;Résultats&quot;&gt;
+    &lt;p class=&quot;info warn&quot; id=&quot;conflictMsg&quot; role=&quot;status&quot;&gt;&lt;/p&gt;
+    &lt;div class=&quot;tablewrap&quot; id=&quot;results&quot;&gt;&lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;export&quot; aria-label=&quot;Export&quot;&gt;
+    &lt;h2&gt;Exporter&lt;/h2&gt;
+    &lt;div class=&quot;actions&quot;&gt;
+      &lt;button type=&quot;button&quot; id=&quot;downloadHolo&quot; class=&quot;btn-holo&quot; data-hint=&quot;Télécharge en un fichier : les markers manquants de la nouvelle séquence ET ceux dont le clip a été allongé, tous replacés en tête de plan (import Avid .txt).&quot;&gt;Markers manquants + allongés, en tête&lt;/button&gt;
+      &lt;button type=&quot;button&quot; id=&quot;downloadAvid&quot; class=&quot;primary&quot; data-hint=&quot;Télécharge tous les changements affichés (nouveaux, modifiés, déplacés, manquants…) avec un auteur par statut : DEL, NEW, MOVE, EDIT, EXT.&quot;&gt;Markers Avid&lt;/button&gt;
+      &lt;button type=&quot;button&quot; id=&quot;downloadRemoved&quot; data-hint=&quot;Télécharge uniquement les markers manquants de la nouvelle séquence, replacés en tête du plan pour les remettre en place.&quot;&gt;Markers manquants, en tête&lt;/button&gt;
+      &lt;button type=&quot;button&quot; id=&quot;downloadExtended&quot; class=&quot;btn-violet&quot; data-hint=&quot;Télécharge les markers dont le clip a été allongé (en tête ou en queue), replacés en tête de clip.&quot;&gt;Markers clips allongés, en tête&lt;/button&gt;
+      &lt;button type=&quot;button&quot; id=&quot;copyReport&quot; data-hint=&quot;Copie le rapport complet (une ligne par marker) pour le coller dans un tableur.&quot;&gt;Copier le rapport&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;p class=&quot;hint&quot; id=&quot;hint&quot; aria-live=&quot;polite&quot;&gt;Survole un bouton pour voir ce qu&#x27;il fait.&lt;/p&gt;
+    &lt;p class=&quot;info&quot; id=&quot;dlMsg&quot; role=&quot;status&quot;&gt;&lt;/p&gt;
+    &lt;p class=&quot;short&quot;&gt;Import dans la nouvelle séquence : Markers &gt; Import. Statut dans la colonne auteur : DEL, NEW, MOVE, EDIT, EXT.&lt;/p&gt;
+    &lt;div id=&quot;outWrap&quot; hidden&gt;
+      &lt;p class=&quot;info&quot; id=&quot;outMsg&quot;&gt;&lt;/p&gt;
+      &lt;textarea id=&quot;outText&quot; readonly spellcheck=&quot;false&quot; aria-label=&quot;Texte à copier&quot;&gt;&lt;/textarea&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;div class=&quot;foot&quot;&gt;
+    &lt;p&gt;Le timecode source d&#x27;un marker est calculé à partir du clip sous le marker : début source du clip plus la distance entre le début du clip dans la timeline et le marker, corrigée de la vitesse quand l&#x27;EDL contient une ligne M2. Le clip retenu est celui de l&#x27;événement qui précède le marker dans l&#x27;EDL, ou à défaut le clip sous le marker dans la timeline. Les calculs se font sans correction drop frame.&lt;/p&gt;
+    &lt;p&gt;Un marker est considéré comme inchangé s&#x27;il se trouve au même timecode source sur le même clip, même si sa position dans la timeline a changé. Un marker absent de la nouvelle séquence est « Supprimé » si son plan y est toujours, « Plan coupé » sinon. Un marker absent de l&#x27;ancienne séquence est « Nouveau » si son plan était déjà dans l&#x27;ancienne séquence, « Nouveau plan » sinon.&lt;/p&gt;
+    &lt;p&gt;Avec le réglage « En tête de clip », un plan est considéré présent quand le même clip est dans l&#x27;autre séquence avec au moins une image source en commun. Le marker est alors replacé sur la première image du clip, et l&#x27;écart de frames en tête entre les deux séquences est indiqué. Avec « Sur leur image source », le plan n&#x27;est présent que si l&#x27;image exacte du marker y est encore. Rien n&#x27;est envoyé : tout se passe dans ton navigateur.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/main&gt;
+
+&lt;script&gt;
+//#core-start
+const COLORS = [&#x27;red&#x27;, &#x27;green&#x27;, &#x27;blue&#x27;, &#x27;cyan&#x27;, &#x27;magenta&#x27;, &#x27;yellow&#x27;, &#x27;black&#x27;, &#x27;white&#x27;];
+const TCX = /\d{2}[:;]\d{2}[:;]\d{2}[:;]\d{2}/g;
+const EVENT_RE = /^\s*(\d{3,6})\s+(\S+)\s+(\S+)\s+(\S+)/;
+const LOC_RE = /^\s*\*\s*LOC:\s*(\d{2}[:;]\d{2}[:;]\d{2}[:;]\d{2})\s+([A-Za-z]+)\s*(.*)$/;
+const CLIP_RE = /^\s*\*\s*FROM CLIP NAME:\s*(.*)$/i;
+const M2_RE = /^\s*M2\s+\S+\s+(-?[\d.]+)\s+/;
+
+function tcToFrames(tc, fps) {
+  const p = String(tc).split(/[:;]/).map(Number);
+  const nf = Math.round(fps) || 24;
+  return ((p[0] * 60 + p[1]) * 60 + p[2]) * nf + p[3];
+}
+function framesToTc(fr, fps, sep) {
+  const nf = Math.round(fps) || 24;
+  const p = n =&gt; String(n).padStart(2, &#x27;0&#x27;);
+  const f = fr % nf;
+  let s = Math.floor(fr / nf);
+  const ss = s % 60;
+  s = Math.floor(s / 60);
+  const mm = s % 60;
+  return p(Math.floor(s / 60)) + &#x27;:&#x27; + p(mm) + &#x27;:&#x27; + p(ss) + (sep || &#x27;:&#x27;) + p(f);
+}
+const normText = s =&gt; String(s || &#x27;&#x27;).toLowerCase().replace(/\s+/g, &#x27; &#x27;).trim();
+const clean = s =&gt; String(s || &#x27;&#x27;).replace(/[\t\r\n]+/g, &#x27; &#x27;).trim();
+
+// Lit les événements (clips) et les markers d&#x27;un EDL.
+function parseEdl(text, fps, clipMode) {
+  const events = [], markers = [];
+  let cur = null;
+  for (const raw of String(text || &#x27;&#x27;).split(/\r\n|\n|\r/)) {
+    let m = raw.match(LOC_RE);
+    if (m) { markers.push({ tc: m[1], color: m[2].toLowerCase(), comment: m[3].replace(/\s+/g, &#x27; &#x27;).trim(), evIdx: cur ? cur.idx : -1 }); continue; }
+    m = raw.match(CLIP_RE);
+    if (m) { if (cur) { cur.clip = m[1].trim(); cur.key = (clipMode === &#x27;reel&#x27; ? cur.reel : (cur.clip || cur.reel)).toLowerCase(); cur.name = clipMode === &#x27;reel&#x27; ? cur.reel : (cur.clip || cur.reel); } continue; }
+    m = raw.match(M2_RE);
+    if (m) { if (cur) cur.ratio = Math.abs(parseFloat(m[1])) / (Math.round(fps) || 24) || 1; continue; }
+    m = raw.match(EVENT_RE);
+    if (m) {
+      const t = raw.match(TCX);
+      if (t &amp;&amp; t.length &gt;= 4) {
+        const n = t.length;
+        cur = {
+          idx: events.length, reel: m[2], track: m[3], clip: &#x27;&#x27;, ratio: 1,
+          srcIn: tcToFrames(t[n - 4], fps), srcOut: tcToFrames(t[n - 3], fps),
+          recIn: tcToFrames(t[n - 2], fps), recOut: tcToFrames(t[n - 1], fps)
+        };
+        cur.key = cur.reel.toLowerCase();
+        cur.name = cur.reel;
+        events.push(cur);
+      }
+    }
+  }
+  return { events, markers };
+}
+
+function makeKey(comment, opts) {
+  if (opts.mode === &#x27;id&#x27; &amp;&amp; opts.re) {
+    const mm = comment.match(opts.re);
+    if (mm) return { key: &#x27;id:&#x27; + mm[0].toUpperCase().replace(/[^A-Z0-9]/g, &#x27;&#x27;), id: mm[0] };
+  }
+  const t = normText(comment);
+  return { key: t ? &#x27;txt:&#x27; + t : &#x27;&#x27;, id: &#x27;&#x27; };
+}
+
+// Ajoute à chaque marker son clip, son timecode source et sa clé d&#x27;identité.
+function resolveMarkers(parsed, fps, kopts) {
+  const events = parsed.events;
+  return parsed.markers.map(mk =&gt; {
+    const rec = tcToFrames(mk.tc, fps);
+    let ev = mk.evIdx &gt;= 0 ? events[mk.evIdx] : null;
+    if (!ev || rec &lt; ev.recIn || rec &gt; ev.recOut) {
+      const under = list =&gt; list.find(e =&gt; rec &gt;= e.recIn &amp;&amp; rec &lt; e.recOut);
+      ev = under(events.filter(e =&gt; /^[VB]/i.test(e.track))) || under(events) || null;
+    }
+    const out = Object.assign({}, mk, makeKey(mk.comment, kopts), { rec, ev });
+    if (ev) {
+      out.clipKey = ev.key; out.clipName = ev.name;
+      out.src = ev.srcIn + Math.round((rec - ev.recIn) * ev.ratio);
+      out.srcTc = framesToTc(out.src, fps, mk.tc.charAt(8));
+    } else { out.clipKey = null; out.clipName = &#x27;&#x27;; out.src = null; out.srcTc = &#x27;&#x27;; }
+    return out;
+  });
+}
+
+// Position (en images, dans la timeline de ces événements) d&#x27;une image source, ou null si le plan n&#x27;y est pas.
+function findPos(events, key, src, ref) {
+  if (key == null || src == null) return null;
+  let best = null, bestD = Infinity, n = 0;
+  for (const e of events) {
+    if (e.key !== key || !(src &gt;= e.srcIn &amp;&amp; src &lt; e.srcOut)) continue;
+    n++;
+    const pos = e.recIn + Math.round((src - e.srcIn) / (e.ratio || 1));
+    const d = ref == null ? 0 : Math.abs(pos - ref);
+    if (d &lt; bestD) { bestD = d; best = pos; }
+  }
+  return best == null ? null : { pos: best, multi: n &gt; 1 };
+}
+
+// Où replacer un marker dans l&#x27;autre séquence : tête du clip (VFX) ou image source. Retourne { pos, note } ou null si le plan n&#x27;y est pas.
+function locate(events, mk, placement) {
+  if (mk.clipKey == null || !mk.ev) return null;
+  if (placement === &#x27;head&#x27;) {
+    const ev = mk.ev;
+    const cands = [];
+    for (const e of events) {
+      if (e.key !== mk.clipKey) continue;
+      const ov = Math.min(ev.srcOut, e.srcOut) - Math.max(ev.srcIn, e.srcIn);
+      if (ov &gt; 0) cands.push({ e, ov });
+    }
+    // Plusieurs plans quasi identiques : on garde ceux qui recouvrent bien, puis le plus proche en position record.
+    const maxOv = cands.reduce((m, c) =&gt; Math.max(m, c.ov), 0);
+    const good = cands.filter(c =&gt; c.ov &gt;= maxOv / 2);
+    good.sort((x, y) =&gt; Math.abs(x.e.recIn - ev.recIn) - Math.abs(y.e.recIn - ev.recIn) || y.ov - x.ov);
+    const best = good.length ? good[0].e : null;
+    const multi = good.length &gt; 1;
+    if (!best) return null;
+    const d = best.srcIn - ev.srcIn;
+    return { pos: best.recIn, note: (d === 0 ? &#x27;tête du clip inchangée&#x27; : &#x27;&#x27;) + (multi ? (d === 0 ? &#x27; · &#x27; : &#x27;&#x27;) + &#x27;plusieurs plans possibles, choisi le plus proche en TC record&#x27; : &#x27;&#x27;), edit: d === 0 ? null : { text: d &gt; 0 ? &#x27;tête du clip rognée de &#x27; + d + &#x27; f&#x27; : &#x27;tête du clip allongée de &#x27; + (-d) + &#x27; f&#x27;, frames: Math.abs(d) } };
+  }
+  const fp = findPos(events, mk.clipKey, mk.src, mk.rec);
+  return fp == null ? null : { pos: fp.pos, note: fp.multi ? &#x27;plusieurs plans possibles, choisi le plus proche en TC record&#x27; : &#x27;&#x27; };
+}
+
+function greedyPairs(O, N, usedO, usedN, ok, cost) {
+  const cands = [];
+  O.forEach((o, i) =&gt; {
+    if (usedO.has(i)) return;
+    N.forEach((n, j) =&gt; {
+      if (usedN.has(j) || !ok(o, n)) return;
+      cands.push({ i, j, c: cost(o, n) });
+    });
+  });
+  cands.sort((a, b) =&gt; a.c[0] - b.c[0] || a.c[1] - b.c[1] || a.c[2] - b.c[2] || a.i - b.i || a.j - b.j);
+  const out = [];
+  for (const c of cands) {
+    if (usedO.has(c.i) || usedN.has(c.j)) continue;
+    usedO.add(c.i); usedN.add(c.j);
+    out.push([O[c.i], N[c.j]]);
+  }
+  return out;
+}
+
+// Évolution du plan sous un marker entre les deux séquences (tête / queue), en images source.
+function editInfo(o, n) {
+  const a = o.ev, b = n.ev;
+  if (!a || !b || a.key !== b.key) return null;
+  const dh = a.srcIn - b.srcIn, dt = b.srcOut - a.srcOut;
+  if (!dh &amp;&amp; !dt) return null;
+  const parts = [];
+  if (dh) parts.push((dh &gt; 0 ? &#x27;allongé&#x27; : &#x27;rogné&#x27;) + &#x27; en tête de &#x27; + Math.abs(dh) + &#x27; f&#x27;);
+  if (dt) parts.push((dt &gt; 0 ? &#x27;allongé&#x27; : &#x27;rogné&#x27;) + &#x27; en queue de &#x27; + Math.abs(dt) + &#x27; f&#x27;);
+  let text = &#x27;clip &#x27; + parts.join(&#x27;, &#x27;);
+  const off = n.src - b.srcIn;
+  if (dh) text += &#x27; · marker à &#x27; + off + &#x27; f de la tête du plan&#x27;;
+  return { text, frames: Math.max(Math.abs(dh), Math.abs(dt)), grew: dh &gt; 0 || dt &gt; 0 };
+}
+
+function compareEdls(O, N, oldEvents, newEvents, opts) {
+  const tol = Math.max(0, opts.tol | 0);
+  const usedO = new Set(), usedN = new Set();
+  const rows = [];
+
+  const pairRow = (o, n, kind) =&gt; {
+    const delta = n.rec - o.rec;
+    const changes = [];
+    if (normText(o.comment) !== normText(n.comment)) changes.push(&#x27;commentaire&#x27;);
+    if (o.color !== n.color) changes.push(&#x27;couleur&#x27;);
+    let status, note = &#x27;&#x27;;
+    const edit = editInfo(o, n);
+    if (kind === &#x27;pos&#x27; &amp;&amp; edit) changes.push(&#x27;montage du plan&#x27;);
+    if (kind === &#x27;pos&#x27;) status = changes.length ? &#x27;modified&#x27; : &#x27;same&#x27;;
+    else {
+      status = &#x27;moved&#x27;;
+      if (kind === &#x27;clip&#x27;) { const d = n.src - o.src; note = &#x27;même plan, &#x27; + (d &gt; 0 ? &#x27;+&#x27; : &#x27;-&#x27;) + Math.abs(d) + &#x27; f source&#x27;; }
+      else note = &#x27;autre plan : &#x27; + (o.clipName || &#x27;sans clip&#x27;) + &#x27; → &#x27; + (n.clipName || &#x27;sans clip&#x27;);
+    }
+    return {
+      status, id: n.id || o.id, clip: n.clipName || o.clipName,
+      srcTc: (o.srcTc &amp;&amp; n.srcTc &amp;&amp; o.srcTc !== n.srcTc) ? o.srcTc + &#x27; → &#x27; + n.srcTc : (n.srcTc || o.srcTc),
+      old: o, new: n, delta, changes, note, mapped: null, edit
+    };
+  };
+  const compat = (o, n) =&gt; (o.key &amp;&amp; n.key) ? o.key === n.key : (!o.key &amp;&amp; !n.key);
+  const recGap = (o, n) =&gt; Math.abs(n.rec - o.rec);
+
+  // 1. Même clip, même image source (à la tolérance près).
+  greedyPairs(O, N, usedO, usedN,
+    (o, n) =&gt; o.clipKey != null &amp;&amp; o.clipKey === n.clipKey &amp;&amp; Math.abs(o.src - n.src) &lt;= tol &amp;&amp; compat(o, n),
+    (o, n) =&gt; [normText(o.comment) === normText(n.comment) ? 0 : 1, Math.abs(o.src - n.src), recGap(o, n)]
+  ).forEach(p =&gt; rows.push(pairRow(p[0], p[1], &#x27;pos&#x27;)));
+
+  // 2. Même identité sur le même clip, mais à un autre endroit du plan.
+  greedyPairs(O, N, usedO, usedN,
+    (o, n) =&gt; o.key &amp;&amp; o.key === n.key &amp;&amp; o.clipKey != null &amp;&amp; o.clipKey === n.clipKey,
+    (o, n) =&gt; [Math.abs(o.src - n.src), recGap(o, n), 0]
+  ).forEach(p =&gt; rows.push(pairRow(p[0], p[1], &#x27;clip&#x27;)));
+
+  // 2b. Markers sans identité (commentaire vide) sur le même clip : association par proximité en image source.
+  greedyPairs(O, N, usedO, usedN,
+    (o, n) =&gt; !o.key &amp;&amp; !n.key &amp;&amp; o.clipKey != null &amp;&amp; o.clipKey === n.clipKey,
+    (o, n) =&gt; [o.color === n.color ? 0 : 1, Math.abs(o.src - n.src), recGap(o, n)]
+  ).forEach(p =&gt; rows.push(pairRow(p[0], p[1], &#x27;clip&#x27;)));
+
+  // 3. Même identité sur un autre clip.
+  greedyPairs(O, N, usedO, usedN,
+    (o, n) =&gt; o.key &amp;&amp; o.key === n.key,
+    (o, n) =&gt; [recGap(o, n), 0, 0]
+  ).forEach(p =&gt; rows.push(pairRow(p[0], p[1], &#x27;other&#x27;)));
+
+  O.forEach((o, i) =&gt; {
+    if (usedO.has(i)) return;
+    const loc = locate(newEvents, o, opts.placement);
+    const kept = o.clipKey == null || loc != null;
+    rows.push({ status: kept ? &#x27;removed&#x27; : &#x27;cut&#x27;, id: o.id, clip: o.clipName, srcTc: o.srcTc, old: o, new: null, delta: 0, changes: [], note: loc ? loc.note : &#x27;&#x27;, mapped: loc ? loc.pos : null, edit: loc ? loc.edit : null, headPos: (hl =&gt; hl ? hl.pos : null)(locate(newEvents, o, &#x27;head&#x27;)) });
+  });
+  N.forEach((n, j) =&gt; {
+    if (usedN.has(j)) return;
+    const loc = locate(oldEvents, n, opts.placement);
+    const existed = n.clipKey == null || loc != null;
+    rows.push({ edit: null, status: existed ? &#x27;added&#x27; : &#x27;newshot&#x27;, id: n.id, clip: n.clipName, srcTc: n.srcTc, old: null, new: n, delta: 0, changes: [], note: &#x27;&#x27;, mapped: loc ? loc.pos : null });
+  });
+
+  // Conflit : même plan, même image source (à la tolérance près), mais identité différente entre l&#x27;ancienne et la nouvelle séquence.
+  const gone = rows.filter(r =&gt; r.status === &#x27;removed&#x27; &amp;&amp; r.old.clipKey != null);
+  const fresh = rows.filter(r =&gt; r.status === &#x27;added&#x27; &amp;&amp; r.new.clipKey != null);
+  gone.forEach(g =&gt; fresh.forEach(a =&gt; {
+    if (g.old.clipKey !== a.new.clipKey || Math.abs(g.old.src - a.new.src) &gt; tol) return;
+    const gid = g.old.id || g.old.comment || &#x27;(sans nom)&#x27;, aid = a.new.id || a.new.comment || &#x27;(sans nom)&#x27;;
+    (g.conflicts = g.conflicts || []).push(aid);
+    (a.conflicts = a.conflicts || []).push(gid);
+  }));
+  gone.concat(fresh).forEach(r =&gt; {
+    if (!r.conflicts) return;
+    const other = r.status === &#x27;removed&#x27; ? &#x27;dans la nouvelle séquence&#x27; : &#x27;dans l\&#x27;ancienne séquence&#x27;;
+    r.conflict = &#x27;CONFLIT : même plan et même image source que &#x27; + r.conflicts.join(&#x27;, &#x27;) + &#x27; &#x27; + other + &#x27;, mais nom différent. Vérifier ce plan.&#x27;;
+  });
+
+  // Tri : position dans la nouvelle séquence quand elle existe, sinon dans l&#x27;ancienne.
+  const ref = r =&gt; r.new ? r.new.rec : (r.status === &#x27;removed&#x27; &amp;&amp; r.mapped != null ? r.mapped : r.old.rec);
+  rows.sort((a, b) =&gt; ref(a) - ref(b) || a.status.localeCompare(b.status));
+  const counts = { removed: 0, cut: 0, added: 0, newshot: 0, moved: 0, modified: 0, same: 0 };
+  rows.forEach(r =&gt; counts[r.status]++);
+  return { rows, counts };
+}
+
+function fmtDelta(d, fps) {
+  if (!d) return &#x27;0&#x27;;
+  const nf = Math.round(fps) || 24;
+  const sign = d &gt; 0 ? &#x27;+&#x27; : &#x27;-&#x27;;
+  const a = Math.abs(d);
+  const s = Math.floor(a / nf), f = a % nf;
+  return sign + a + &#x27; f&#x27; + (s ? &#x27; (&#x27; + sign + s + &#x27;s &#x27; + f + &#x27;f)&#x27; : &#x27;&#x27;);
+}
+
+const STATUS_LABEL = { removed: &#x27;Supprimé&#x27;, cut: &#x27;Plan coupé&#x27;, added: &#x27;Nouveau&#x27;, newshot: &#x27;Nouveau plan&#x27;, moved: &#x27;Déplacé&#x27;, modified: &#x27;Modifié&#x27;, same: &#x27;Inchangé&#x27; };
+const STATUS_ORDER = [&#x27;removed&#x27;, &#x27;cut&#x27;, &#x27;added&#x27;, &#x27;newshot&#x27;, &#x27;moved&#x27;, &#x27;modified&#x27;, &#x27;same&#x27;];
+
+const handlesVal = () =&gt; Math.max(0, parseInt(document.getElementById(&#x27;handles&#x27;).value, 10) || 0);
+const isOver = r =&gt; !!r.edit &amp;&amp; handlesVal() &gt; 0 &amp;&amp; r.edit.frames &gt; handlesVal();
+
+function reportTSV(rows, fps) {
+  const head = [&#x27;Statut&#x27;, &#x27;ID&#x27;, &#x27;Clip&#x27;, &#x27;TC source&#x27;, &#x27;TC ancienne sequence&#x27;, &#x27;TC nouvelle sequence&#x27;, &#x27;Position de replacement&#x27;, &#x27;Ecart timeline&#x27;, &#x27;Couleur ancienne&#x27;, &#x27;Couleur nouvelle&#x27;, &#x27;Commentaire ancienne&#x27;, &#x27;Commentaire nouvelle&#x27;, &#x27;Precision&#x27;];
+  const lines = [head.join(&#x27;\t&#x27;)];
+  rows.forEach(r =&gt; lines.push([
+    STATUS_LABEL[r.status], r.id, r.clip, r.srcTc, r.old ? r.old.tc : &#x27;&#x27;, r.new ? r.new.tc : &#x27;&#x27;,
+    r.status === &#x27;removed&#x27; &amp;&amp; r.mapped != null ? framesToTc(r.mapped, fps, r.old.tc.charAt(8)) : &#x27;&#x27;,
+    r.old &amp;&amp; r.new ? fmtDelta(r.delta, fps) : &#x27;&#x27;,
+    r.old ? r.old.color : &#x27;&#x27;, r.new ? r.new.color : &#x27;&#x27;,
+    r.old ? r.old.comment : &#x27;&#x27;, r.new ? r.new.comment : &#x27;&#x27;,
+    [r.changes.join(&#x27;, &#x27;), r.note, r.conflict || &#x27;&#x27;, r.edit ? r.edit.text + (isOver(r) ? &#x27; [HORS POIGNEES]&#x27; : &#x27;&#x27;) : &#x27;&#x27;].filter(Boolean).join(&#x27; ; &#x27;)
+  ].map(clean).join(&#x27;\t&#x27;)));
+  return lines.join(&#x27;\n&#x27;);
+}
+
+// Markers à importer dans la nouvelle séquence. Retourne le texte et le nombre de markers non exportables (plans coupés).
+function avidMarkers(rows, fps) {
+  const out = []; let skipped = 0;
+  rows.forEach(r =&gt; {
+    if (r.status === &#x27;same&#x27;) return;
+    let tc, color, text, m, who;
+    if (r.status === &#x27;cut&#x27;) { skipped++; return; }
+    if (r.status === &#x27;removed&#x27;) {
+      m = r.old; color = &#x27;red&#x27;; text = m.comment; who = &#x27;DEL&#x27;;
+      tc = r.mapped != null ? framesToTc(r.mapped, fps, m.tc.charAt(8)) : m.tc;
+    }
+    else if (r.status === &#x27;added&#x27;) { m = r.new; color = &#x27;green&#x27;; text = m.comment; who = &#x27;NEW&#x27;; tc = m.tc; }
+    else if (r.status === &#x27;newshot&#x27;) { m = r.new; color = &#x27;green&#x27;; text = m.comment; who = &#x27;NEWSHOT&#x27;; tc = m.tc; }
+    else if (r.status === &#x27;moved&#x27;) { m = r.new; color = &#x27;yellow&#x27;; text = m.comment; who = &#x27;MOVE&#x27;; tc = m.tc; }
+    else { m = r.new; color = &#x27;magenta&#x27;; text = m.comment; who = &#x27;EDIT&#x27;; tc = m.tc; }
+    out.push([who, tc, &#x27;V1&#x27;, color, clean(text), &#x27;1&#x27;].join(&#x27;\t&#x27;));
+  });
+  return { text: out.join(&#x27;\n&#x27;), skipped };
+}
+
+// Markers supprimés seulement, replacés sur leur plan dans la nouvelle séquence (tête de clip ou image source), commentaire inchangé.
+// Markers dont le clip a été allongé (tête et/ou queue) : on les remet en tête du clip dans la nouvelle séquence.
+function extendedMarkers(rows, fps) {
+  const out = []; const skipped = 0;
+  rows.forEach(r =&gt; {
+    if (!r.new || !r.new.ev || !r.edit || !r.edit.grew) return;
+    const n = r.new, head = n.ev.recIn;
+    if (n.rec === head) return;
+    out.push([&#x27;EXT&#x27;, framesToTc(head, fps, n.tc.charAt(8)), &#x27;V1&#x27;, &#x27;magenta&#x27;, clean(n.comment), &#x27;1&#x27;].join(&#x27;\t&#x27;));
+  });
+  return { text: out.join(&#x27;\n&#x27;), skipped };
+}
+// Les deux récupérations en tête de clip dans un seul fichier, triées par TC.
+function headRecoveryMarkers(rows, fps) {
+  const a = removedOnlyMarkers(rows, fps), b = extendedMarkers(rows, fps);
+  const lines = a.text.split(&#x27;\n&#x27;).concat(b.text.split(&#x27;\n&#x27;)).filter(Boolean);
+  lines.sort((x, y) =&gt; x.split(&#x27;\t&#x27;)[1].localeCompare(y.split(&#x27;\t&#x27;)[1]));
+  return { text: lines.join(&#x27;\n&#x27;), skipped: a.skipped };
+}
+function removedOnlyMarkers(rows, fps) {
+  const out = []; let skipped = 0;
+  rows.forEach(r =&gt; {
+    if (r.status === &#x27;cut&#x27;) { skipped++; return; }
+    if (r.status !== &#x27;removed&#x27;) return;
+    const pos = r.headPos != null ? r.headPos : r.mapped;
+    const tc = pos != null ? framesToTc(pos, fps, r.old.tc.charAt(8)) : r.old.tc;
+    out.push([&#x27;DEL&#x27;, tc, &#x27;V1&#x27;, &#x27;red&#x27;, clean(r.old.comment), &#x27;1&#x27;].join(&#x27;\t&#x27;));
+  });
+  return { text: out.join(&#x27;\n&#x27;), skipped };
+}
+
+const DEMO_V1 = [
+  &#x27;TITLE: DEMO_ANCIENNE&#x27;, &#x27;FCM: NON-DROP FRAME&#x27;, &#x27;&#x27;,
+  &#x27;001  A001C001 V     C        10:00:00:00 10:00:10:00 01:00:00:00 01:00:10:00&#x27;,
+  &#x27;* FROM CLIP NAME: A001C001.mov&#x27;,
+  &#x27;* LOC: 01:00:00:00 RED     001-010 Raccord regard&#x27;,
+  &#x27;* LOC: 01:00:06:00 GREEN   001-020 VFX nettoyage&#x27;,
+  &#x27;* LOC: 01:00:08:00 YELLOW  001-025 Flare&#x27;,
+  &#x27;002  A001C002 V     C        10:05:00:00 10:05:08:00 01:00:10:00 01:00:18:00&#x27;,
+  &#x27;* FROM CLIP NAME: A001C002.mov&#x27;,
+  &#x27;* LOC: 01:00:12:00 BLUE    001-030 Titre&#x27;,
+  &#x27;* LOC: 01:00:15:00 BLUE    001-035 Fond ciel&#x27;,
+  &#x27;003  A002C001 V     C        11:00:00:00 11:00:06:00 01:00:18:00 01:00:24:00&#x27;,
+  &#x27;* FROM CLIP NAME: A002C001.mov&#x27;,
+  &#x27;* LOC: 01:00:18:00 YELLOW  001-040 Plan supprimé du montage&#x27;,
+  &#x27;&#x27;
+].join(&#x27;\n&#x27;);
+const DEMO_V2 = [
+  &#x27;TITLE: DEMO_NOUVELLE&#x27;, &#x27;FCM: NON-DROP FRAME&#x27;, &#x27;&#x27;,
+  &#x27;001  A001C001 V     C        10:00:03:00 10:00:10:00 01:00:00:00 01:00:07:00&#x27;,
+  &#x27;* FROM CLIP NAME: A001C001.mov&#x27;,
+  &#x27;* LOC: 01:00:03:00 GREEN   001-020 VFX nettoyage&#x27;,
+  &#x27;* LOC: 01:00:06:00 YELLOW  001-025 Flare&#x27;,
+  &#x27;002  A003C007 V     C        12:00:00:00 12:00:04:00 01:00:07:00 01:00:11:00&#x27;,
+  &#x27;* FROM CLIP NAME: A003C007.mov&#x27;,
+  &#x27;* LOC: 01:00:07:00 RED     001-050 Nouveau plan&#x27;,
+  &#x27;003  A001C002 V     C        10:05:00:00 10:05:08:00 01:00:11:00 01:00:19:00&#x27;,
+  &#x27;* FROM CLIP NAME: A001C002.mov&#x27;,
+  &#x27;* LOC: 01:00:13:00 MAGENTA 001-030 Titre corrigé&#x27;,
+  &#x27;* LOC: 01:00:17:00 CYAN    001-060 Retouche peau&#x27;,
+  &#x27;&#x27;
+].join(&#x27;\n&#x27;);
+//#core-end
+
+/* ---------- UI ---------- */
+const $ = id =&gt; document.getElementById(id);
+const colorOn = {};
+let seenColors = [];
+const fileNames = { oldText: &#x27;&#x27;, newText: &#x27;&#x27; };
+const fileEdited = { oldText: false, newText: false };
+const filter = { removed: true, cut: true, added: true, newshot: true, moved: true, modified: true, same: false };
+let last = { rows: [], counts: null, fps: 24 };
+
+const COLOR_HEX = { red: &#x27;#e53935&#x27;, green: &#x27;#2e9e4f&#x27;, blue: &#x27;#2f6fe0&#x27;, cyan: &#x27;#12b5c9&#x27;, magenta: &#x27;#c2379d&#x27;, yellow: &#x27;#e8b923&#x27;, black: &#x27;#111&#x27;, white: &#x27;#fff&#x27; };
+const esc = s =&gt; String(s == null ? &#x27;&#x27; : s).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g, c =&gt; ({ &#x27;&amp;&#x27;: &#x27;&amp;amp;&#x27;, &#x27;&lt;&#x27;: &#x27;&amp;lt;&#x27;, &#x27;&gt;&#x27;: &#x27;&amp;gt;&#x27;, &#x27;&quot;&#x27;: &#x27;&amp;quot;&#x27;, &quot;&#x27;&quot;: &#x27;&amp;#39;&#x27; }[c]));
+const dot = c =&gt; c ? &#x27;&lt;span class=&quot;dot&quot; style=&quot;background:&#x27; + (COLOR_HEX[c] || &#x27;transparent&#x27;) + &#x27;&quot;&gt;&lt;/span&gt;&#x27; + esc(c) : &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;;
+const fmtPct = p =&gt; Math.round(p) + &#x27; %&#x27;;
+
+function showName(taId) {
+  const el = $(taId.replace(&#x27;Text&#x27;, &#x27;Name&#x27;));
+  if (!$(taId).value.trim()) { fileNames[taId] = &#x27;&#x27;; fileEdited[taId] = false; el.hidden = true; return; }
+  const nm = fileNames[taId];
+  el.hidden = false;
+  el.title = nm;
+  el.innerHTML = nm ? &#x27;Fichier : &lt;strong&gt;&#x27; + esc(nm) + &#x27;&lt;/strong&gt;&#x27; + (fileEdited[taId] ? &#x27; (modifié)&#x27; : &#x27;&#x27;) : &#x27;Texte collé&#x27;;
+}
+
+function setInfo(el, parsed, text) {
+  if (!text.trim()) { el.textContent = &#x27;&#x27;; el.className = &#x27;info&#x27;; return; }
+  if (!parsed.events.length) {
+    el.textContent = &#x27;Aucun événement reconnu. Exporte l\&#x27;EDL depuis Avid avec les markers (lignes « * LOC: »).&#x27;;
+    el.className = &#x27;info warn&#x27;;
+    return;
+  }
+  const nm = parsed.markers.length, ne = parsed.events.length;
+  el.textContent = nm + &#x27; marker&#x27; + (nm &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; · &#x27; + ne + &#x27; événement&#x27; + (ne &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;);
+  if (!nm) { el.textContent += &#x27; · aucun marker dans cet EDL&#x27;; el.className = &#x27;info warn&#x27;; } else el.className = &#x27;info&#x27;;
+}
+
+function renderColors(colors) {
+  seenColors = colors;
+  colors.forEach(c =&gt; { if (!(c in colorOn)) colorOn[c] = true; });
+  $(&#x27;colorBar&#x27;).hidden = !colors.length;
+  $(&#x27;colorList&#x27;).innerHTML = colors.map(c =&gt;
+    &#x27;&lt;label class=&quot;check&quot;&gt;&lt;input type=&quot;checkbox&quot; data-c=&quot;&#x27; + esc(c) + &#x27;&quot;&#x27; + (colorOn[c] ? &#x27; checked&#x27; : &#x27;&#x27;) + &#x27;&gt;&#x27; + (c ? dot(c) : &#x27;&lt;span class=&quot;dim&quot;&gt;sans couleur&lt;/span&gt;&#x27;) + &#x27;&lt;/label&gt;&#x27;
+  ).join(&#x27;&#x27;);
+}
+
+const CHIP_LABEL = { removed: &#x27;Supprimés&#x27;, cut: &#x27;Plans coupés&#x27;, added: &#x27;Nouveaux&#x27;, newshot: &#x27;Nouveaux plans&#x27;, moved: &#x27;Déplacés&#x27;, modified: &#x27;Modifiés&#x27;, same: &#x27;Inchangés&#x27; };
+const CHIP_HELP = {
+  removed: &#x27;Marker absent de la nouvelle séquence alors que son plan y est toujours (marker à replacer)&#x27;,
+  cut: &#x27;Marker absent de la nouvelle séquence et son plan n\&#x27;y est plus&#x27;,
+  added: &#x27;Nouveau marker sur un plan déjà présent dans l\&#x27;ancienne séquence&#x27;,
+  newshot: &#x27;Nouveau marker sur un plan absent de l\&#x27;ancienne séquence&#x27;,
+  moved: &#x27;Même marker, à un autre endroit du plan ou sur un autre plan&#x27;,
+  modified: &#x27;Même position source, commentaire ou couleur différents&#x27;,
+  same: &#x27;Même plan, même image source, même commentaire et même couleur&#x27;
+};
+
+function renderSummary() {
+  const c = last.counts || { removed: 0, cut: 0, added: 0, newshot: 0, moved: 0, modified: 0, same: 0 };
+  const total = STATUS_ORDER.reduce((a, s) =&gt; a + c[s], 0);
+  $(&#x27;summary&#x27;).innerHTML = STATUS_ORDER.map(s =&gt; {
+    const pct = total ? c[s] * 100 / total : 0;
+    return &#x27;&lt;button type=&quot;button&quot; class=&quot;chip&quot; data-s=&quot;&#x27; + s + &#x27;&quot; aria-pressed=&quot;&#x27; + filter[s] + &#x27;&quot; title=&quot;&#x27; + esc(CHIP_HELP[s]) + &#x27;&quot;&gt;&#x27; +
+      &#x27;&lt;span class=&quot;l&quot;&gt;&#x27; + CHIP_LABEL[s] + &#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&#x27; + fmtPct(pct) + &#x27; du total&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;&#x27; + c[s] + &#x27;&lt;/span&gt;&#x27; +
+      &#x27;&lt;span class=&quot;track&quot;&gt;&lt;span class=&quot;fill&quot; style=&quot;width:&#x27; + pct + &#x27;%&quot;&gt;&lt;/span&gt;&lt;/span&gt;&lt;/button&gt;&#x27;;
+  }).join(&#x27;&#x27;);
+}
+
+function visibleRows() { return last.rows.filter(r =&gt; filter[r.status]); }
+
+function renderTable(hasInput) {
+  const box = $(&#x27;results&#x27;);
+  const nConf = last.rows.filter(r =&gt; r.conflict &amp;&amp; r.status === &#x27;removed&#x27;).length;
+  $(&#x27;conflictMsg&#x27;).textContent = nConf ? &#x27;⚠ &#x27; + nConf + &#x27; conflit&#x27; + (nConf &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; : un marker supprimé et un marker nouveau occupent le même plan et la même image source avec des noms différents. Vérifie ces plans (lignes marquées CONFLIT).&#x27; : &#x27;&#x27;;
+  if (!hasInput) {
+    box.innerHTML = &#x27;&lt;div class=&quot;empty&quot;&gt;Colle ou charge deux EDL pour voir les différences ici.&lt;/div&gt;&#x27;;
+    return;
+  }
+  const rows = visibleRows();
+  if (!rows.length) {
+    box.innerHTML = &#x27;&lt;div class=&quot;empty&quot;&gt;&#x27; + (last.rows.length ? &#x27;Aucune ligne pour les statuts sélectionnés. Active un filtre ci-dessus.&#x27; : &#x27;Aucun marker pour les couleurs cochées.&#x27;) + &#x27;&lt;/div&gt;&#x27;;
+    return;
+  }
+  const fps = last.fps;
+  const sepOf = r =&gt; (r.old || r.new).tc.charAt(8);
+  const body = rows.map(r =&gt; {
+    const o = r.old, n = r.new;
+    let comment;
+    if (r.changes.includes(&#x27;commentaire&#x27;)) comment = &#x27;&lt;del&gt;&#x27; + esc(o.comment) + &#x27;&lt;/del&gt;&lt;br&gt;&lt;ins&gt;&#x27; + esc(n.comment) + &#x27;&lt;/ins&gt;&#x27;;
+    else comment = esc((n || o).comment) || &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;;
+    let color;
+    if (o &amp;&amp; n &amp;&amp; o.color !== n.color) color = dot(o.color) + &#x27; &lt;span class=&quot;dim&quot;&gt;→&lt;/span&gt; &#x27; + dot(n.color);
+    else color = dot((n || o).color);
+    const notes = [];
+    const conflictHtml = r.conflict ? &#x27;&lt;span class=&quot;note conflict&quot;&gt;⚠ &#x27; + esc(r.conflict) + &#x27;&lt;/span&gt;&#x27; : &#x27;&#x27;;
+    const editHtml = r.edit ? &#x27;&lt;span class=&quot;note edit&#x27; + (isOver(r) ? &#x27; over&#x27; : &#x27;&#x27;) + &#x27;&quot;&gt;&#x27; + esc(r.edit.text) + (isOver(r) ? &#x27; — hors poignées (&#x27; + handlesVal() + &#x27; f)&#x27; : &#x27;&#x27;) + &#x27;&lt;/span&gt;&#x27; : &#x27;&#x27;;
+    if (r.status === &#x27;moved&#x27; &amp;&amp; r.changes.length) notes.push(&#x27;aussi : &#x27; + r.changes.join(&#x27;, &#x27;));
+    if (r.note) notes.unshift(r.note);
+    if (r.status === &#x27;removed&#x27; &amp;&amp; r.mapped != null) notes.push(&#x27;plan présent dans la nouvelle séquence&#x27;);
+    if (r.status === &#x27;cut&#x27;) notes.push(&#x27;plan absent de la nouvelle séquence&#x27;);
+    if (r.status === &#x27;added&#x27; &amp;&amp; r.mapped != null) notes.push(&#x27;plan déjà présent dans l\&#x27;ancienne séquence&#x27;);
+    if (r.status === &#x27;newshot&#x27;) notes.push(&#x27;plan absent de l\&#x27;ancienne séquence&#x27;);
+    let tc1 = o ? esc(o.tc) : (r.status === &#x27;added&#x27; &amp;&amp; r.mapped != null ? &#x27;&lt;span class=&quot;dim&quot; title=&quot;Position du plan dans l\&#x27;ancienne séquence&quot;&gt;&#x27; + esc(framesToTc(r.mapped, fps, sepOf(r))) + &#x27;&lt;/span&gt;&#x27; : &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;);
+    let tc2 = n ? esc(n.tc) : (r.status === &#x27;removed&#x27; &amp;&amp; r.mapped != null ? &#x27;&lt;span class=&quot;dim&quot; title=&quot;Position de replacement dans la nouvelle séquence&quot;&gt;&#x27; + esc(framesToTc(r.mapped, fps, sepOf(r))) + &#x27;&lt;/span&gt;&#x27; : &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;);
+    return &#x27;&lt;tr&gt;&lt;td&gt;&lt;span class=&quot;pill&quot; data-s=&quot;&#x27; + r.status + &#x27;&quot;&gt;&#x27; + STATUS_LABEL[r.status] + &#x27;&lt;/span&gt;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;id&quot;&gt;&#x27; + (esc(r.id) || &#x27;&lt;span class=&quot;dim&quot;&gt;sans ID&lt;/span&gt;&#x27;) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;clip&quot; title=&quot;&#x27; + esc(r.clip) + &#x27;&quot;&gt;&#x27; + (esc(r.clip) || &#x27;&lt;span class=&quot;dim&quot;&gt;sans clip&lt;/span&gt;&#x27;) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;tc&quot;&gt;&#x27; + (esc(r.srcTc) || &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;tc&quot;&gt;&#x27; + tc1 + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;tc&quot;&gt;&#x27; + tc2 + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;tc&quot;&gt;&#x27; + (o &amp;&amp; n ? esc(fmtDelta(r.delta, fps)) : &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td&gt;&#x27; + color + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;comment&quot;&gt;&#x27; + comment + notes.map(t =&gt; &#x27;&lt;span class=&quot;note&quot;&gt;&#x27; + esc(t) + &#x27;&lt;/span&gt;&#x27;).join(&#x27;&#x27;) + editHtml + conflictHtml + &#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;;
+  }).join(&#x27;&#x27;);
+  box.innerHTML = &#x27;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Statut&lt;/th&gt;&lt;th&gt;ID&lt;/th&gt;&lt;th&gt;Clip&lt;/th&gt;&lt;th&gt;TC source&lt;/th&gt;&lt;th&gt;TC ancienne&lt;/th&gt;&lt;th&gt;TC nouvelle&lt;/th&gt;&lt;th&gt;Écart timeline&lt;/th&gt;&lt;th&gt;Couleur&lt;/th&gt;&lt;th&gt;Commentaire&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&#x27; + body + &#x27;&lt;/tbody&gt;&lt;/table&gt;&#x27;;
+}
+
+function run() {
+  const fps = parseFloat($(&#x27;fps&#x27;).value) || 24;
+  const clipMode = $(&#x27;clipMode&#x27;).value;
+  let mode = $(&#x27;keyMode&#x27;).value;
+  $(&#x27;idRegex&#x27;).disabled = mode !== &#x27;id&#x27;;
+  $(&#x27;idPreset&#x27;).disabled = mode !== &#x27;id&#x27;;
+  let re = null, regexMsg = &#x27;&#x27;;
+  const src = $(&#x27;idRegex&#x27;).value.trim();
+  if (mode === &#x27;id&#x27; &amp;&amp; src) {
+    try { re = new RegExp(src, &#x27;i&#x27;); } catch (e) { regexMsg = &#x27;Motif invalide, comparaison par commentaire entier.&#x27;; }
+  }
+  if (mode === &#x27;id&#x27; &amp;&amp; !re) mode = &#x27;comment&#x27;;
+  const oText = $(&#x27;oldText&#x27;).value, nText = $(&#x27;newText&#x27;).value;
+  const po = parseEdl(oText, fps, clipMode), pn = parseEdl(nText, fps, clipMode);
+  setInfo($(&#x27;oldInfo&#x27;), po, oText);
+  setInfo($(&#x27;newInfo&#x27;), pn, nText);
+  if (regexMsg) { $(&#x27;newInfo&#x27;).textContent = regexMsg + &#x27; &#x27; + $(&#x27;newInfo&#x27;).textContent; $(&#x27;newInfo&#x27;).className = &#x27;info warn&#x27;; }
+  const kopts = { mode, re };
+  const O = resolveMarkers(po, fps, kopts), N = resolveMarkers(pn, fps, kopts);
+
+  const present = new Set();
+  O.concat(N).forEach(mk =&gt; present.add(mk.color));
+  const found = COLORS.filter(c =&gt; present.has(c));
+  if (present.has(&#x27;&#x27;)) found.push(&#x27;&#x27;);
+  O.concat(N).forEach(mk =&gt; { if (mk.color &amp;&amp; !COLORS.includes(mk.color) &amp;&amp; !found.includes(mk.color)) found.push(mk.color); });
+  if (found.join(&#x27;|&#x27;) !== seenColors.join(&#x27;|&#x27;)) renderColors(found);
+
+  const hasInput = !!(O.length || N.length);
+  const res = hasInput ? compareEdls(O, N, po.events, pn.events, { tol: parseInt($(&#x27;tol&#x27;).value, 10) || 0, placement: $(&#x27;placement&#x27;).value }) : { rows: [], counts: null };
+  const pass = mk =&gt; !!mk &amp;&amp; colorOn[mk.color || &#x27;&#x27;] !== false;
+  let rows = res.rows, counts = res.counts;
+  if (counts) {
+    rows = res.rows.filter(r =&gt; pass(r.old) || pass(r.new));
+    counts = { removed: 0, cut: 0, added: 0, newshot: 0, moved: 0, modified: 0, same: 0 };
+    rows.forEach(r =&gt; counts[r.status]++);
+  }
+  last = { rows, counts, fps };
+  renderSummary();
+  renderTable(hasInput);
+}
+
+let timer = null;
+const later = () =&gt; { clearTimeout(timer); timer = setTimeout(run, 150); };
+
+function readFile(file, target) {
+  const rd = new FileReader();
+  const done = txt =&gt; { target.value = txt; fileNames[target.id] = file.name; fileEdited[target.id] = false; showName(target.id); run(); };
+  rd.onload = () =&gt; {
+    const txt = String(rd.result || &#x27;&#x27;);
+    if (txt.indexOf(String.fromCharCode(65533)) &gt;= 0) {
+      const rd2 = new FileReader();
+      rd2.onload = () =&gt; done(String(rd2.result || &#x27;&#x27;));
+      rd2.readAsText(file, &#x27;windows-1252&#x27;);
+      return;
+    }
+    done(txt);
+  };
+  rd.readAsText(file, &#x27;utf-8&#x27;);
+}
+function wireFile(inputId, textId) {
+  const input = $(inputId), ta = $(textId);
+  input.addEventListener(&#x27;change&#x27;, () =&gt; { if (input.files &amp;&amp; input.files[0]) readFile(input.files[0], ta); input.value = &#x27;&#x27;; });
+  ta.addEventListener(&#x27;dragover&#x27;, e =&gt; e.preventDefault());
+  ta.addEventListener(&#x27;drop&#x27;, e =&gt; {
+    const f = e.dataTransfer &amp;&amp; e.dataTransfer.files &amp;&amp; e.dataTransfer.files[0];
+    if (f) { e.preventDefault(); readFile(f, ta); }
+  });
+  ta.addEventListener(&#x27;input&#x27;, () =&gt; { if (fileNames[textId]) fileEdited[textId] = true; showName(textId); later(); });
+}
+wireFile(&#x27;oldFile&#x27;, &#x27;oldText&#x27;);
+wireFile(&#x27;newFile&#x27;, &#x27;newText&#x27;);
+$(&#x27;idPreset&#x27;).addEventListener(&#x27;change&#x27;, () =&gt; { if ($(&#x27;idPreset&#x27;).value) $(&#x27;idRegex&#x27;).value = $(&#x27;idPreset&#x27;).value; });
+$(&#x27;idRegex&#x27;).addEventListener(&#x27;input&#x27;, () =&gt; {
+  const p = $(&#x27;idPreset&#x27;);
+  const hit = Array.from(p.options).find(o =&gt; o.value &amp;&amp; o.value === $(&#x27;idRegex&#x27;).value);
+  p.value = hit ? hit.value : &#x27;&#x27;;
+});
+[&#x27;fps&#x27;, &#x27;clipMode&#x27;, &#x27;tol&#x27;, &#x27;handles&#x27;, &#x27;placement&#x27;, &#x27;keyMode&#x27;, &#x27;idPreset&#x27;, &#x27;idRegex&#x27;].forEach(id =&gt; { $(id).addEventListener(&#x27;input&#x27;, later); $(id).addEventListener(&#x27;change&#x27;, later); });
+
+$(&#x27;colorList&#x27;).addEventListener(&#x27;change&#x27;, e =&gt; {
+  const t = e.target;
+  if (t &amp;&amp; t.matches &amp;&amp; t.matches(&#x27;input[data-c]&#x27;)) { colorOn[t.dataset.c] = t.checked; run(); }
+});
+$(&#x27;runBtn&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; { run(); $(&#x27;results&#x27;).scrollIntoView({ behavior: &#x27;smooth&#x27;, block: &#x27;start&#x27; }); });
+$(&#x27;demoBtn&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; {
+  $(&#x27;oldText&#x27;).value = DEMO_V1; $(&#x27;newText&#x27;).value = DEMO_V2;
+  fileNames.oldText = &#x27;DEMO_ANCIENNE.edl&#x27;; fileNames.newText = &#x27;DEMO_NOUVELLE.edl&#x27;;
+  fileEdited.oldText = false; fileEdited.newText = false;
+  showName(&#x27;oldText&#x27;); showName(&#x27;newText&#x27;);
+  $(&#x27;fps&#x27;).value = &#x27;24&#x27;;
+  run();
+});
+$(&#x27;clearBtn&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; {
+  Object.keys(colorOn).forEach(k =&gt; { delete colorOn[k]; });
+  $(&#x27;oldText&#x27;).value = &#x27;&#x27;; $(&#x27;newText&#x27;).value = &#x27;&#x27;;
+  [&#x27;oldText&#x27;, &#x27;newText&#x27;].forEach(id =&gt; { fileNames[id] = &#x27;&#x27;; showName(id); });
+  $(&#x27;outWrap&#x27;).hidden = true; $(&#x27;dlMsg&#x27;).textContent = &#x27;&#x27;;
+  run();
+});
+$(&#x27;summary&#x27;).addEventListener(&#x27;click&#x27;, e =&gt; {
+  const b = e.target.closest(&#x27;.chip&#x27;);
+  if (!b) return;
+  filter[b.dataset.s] = !filter[b.dataset.s];
+  renderSummary(); renderTable(!!last.counts);
+});
+
+async function copyOut(text, label, hint) {
+  const ta = $(&#x27;outText&#x27;);
+  $(&#x27;outWrap&#x27;).hidden = false;
+  ta.value = text;
+  ta.focus(); ta.select();
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = false; }
+  $(&#x27;outMsg&#x27;).textContent = ok ? label + &#x27; copié. &#x27; + hint : &#x27;Sélectionne le texte ci-dessous et copie-le (Ctrl ou Cmd + C). &#x27; + hint;
+}
+$(&#x27;copyReport&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; {
+  if (!last.rows.length) { copyOut(&#x27;&#x27;, &#x27;Rapport&#x27;, &#x27;Aucune donnée à exporter.&#x27;); return; }
+  copyOut(reportTSV(visibleRows(), last.fps), &#x27;Rapport&#x27;, &#x27;Colle-le dans Excel ou Google Sheets.&#x27;);
+});
+
+// Téléchargement d&#x27;un .txt (UTF-8, fins de ligne Unix). Dans claude.ai : capacité &quot;downloads&quot; ; ailleurs : lien de téléchargement classique.
+async function saveTxt(filename, text) {
+  let dl = null;
+  try { dl = window.claude &amp;&amp; window.claude.use ? await window.claude.use(&#x27;downloads&#x27;) : null; } catch (e) { dl = null; }
+  if (dl) { await dl.save({ filename, data: text }); return; }
+  const url = URL.createObjectURL(new Blob([text], { type: &#x27;text/plain;charset=utf-8&#x27; }));
+  const a = document.createElement(&#x27;a&#x27;);
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() =&gt; URL.revokeObjectURL(url), 2000);
+}
+async function exportTxt(res, filename, emptyMsg, fallbackLabel) {
+  const msg = $(&#x27;dlMsg&#x27;);
+  if (!res.text) {
+    msg.textContent = emptyMsg + (res.skipped ? &#x27; &#x27; + res.skipped + &#x27; marker&#x27; + (res.skipped &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; de plans coupés non exporté&#x27; + (res.skipped &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27;.&#x27; : &#x27;&#x27;);
+    msg.className = &#x27;info warn&#x27;;
+    return;
+  }
+  const n = res.text.split(&#x27;\n&#x27;).length;
+  const extra = res.skipped ? &#x27; &#x27; + res.skipped + &#x27; marker&#x27; + (res.skipped &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; de plans coupés non exporté&#x27; + (res.skipped &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27;.&#x27; : &#x27;&#x27;;
+  try {
+    await saveTxt(filename, res.text + &#x27;\n&#x27;);
+    msg.textContent = n + &#x27; marker&#x27; + (n &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; exporté&#x27; + (n &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; dans &#x27; + filename + &#x27;. Dans Avid : Markers &gt; Import dans la nouvelle séquence.&#x27; + extra;
+    msg.className = &#x27;info&#x27;;
+  } catch (e) {
+    if (e &amp;&amp; e.code === &#x27;declined&#x27;) { msg.textContent = &#x27;Téléchargement annulé.&#x27;; msg.className = &#x27;info&#x27;; return; }
+    msg.textContent = &#x27;Le téléchargement a échoué. Le texte est affiché ci-dessous : enregistre-le dans un .txt.&#x27;; msg.className = &#x27;info warn&#x27;;
+    copyOut(res.text, fallbackLabel, &#x27;Enregistre-les dans un .txt (fins de ligne Unix).&#x27;);
+  }
+}
+$(&#x27;downloadAvid&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; exportTxt(
+  avidMarkers(visibleRows(), last.fps), &#x27;markers_changements.txt&#x27;,
+  &#x27;Aucun changement à exporter. Compare d\&#x27;abord deux EDL et garde au moins un statut actif.&#x27;, &#x27;Markers de changement&#x27;));
+$(&#x27;downloadRemoved&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; exportTxt(
+  removedOnlyMarkers(last.rows, last.fps), &#x27;markers_manquants.txt&#x27;,
+  &#x27;Aucun marker manquant à exporter. Compare d\&#x27;abord deux EDL.&#x27;, &#x27;Markers manquants&#x27;));
+
+$(&#x27;downloadExtended&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; exportTxt(
+  extendedMarkers(last.rows, last.fps), &#x27;markers_clips_allonges.txt&#x27;,
+  &#x27;Aucun marker à replacer : aucun clip allongé sous un marker qui ne soit pas déjà en tête.&#x27;, &#x27;Markers de clips allongés&#x27;));
+
+$(&#x27;downloadHolo&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; exportTxt(
+  headRecoveryMarkers(last.rows, last.fps), &#x27;markers_a_replacer_en_tete.txt&#x27;,
+  &#x27;Aucun marker à replacer en tête : ni manquant, ni sous un clip allongé. Compare d\&#x27;abord deux EDL.&#x27;, &#x27;Markers à replacer en tête&#x27;));
+
+run();
+(() =&gt; {
+  const h = document.getElementById(&#x27;hint&#x27;), dflt = h.textContent;
+  const bs = document.querySelectorAll(&#x27;.actions button[data-hint]&#x27;);
+  bs.forEach(b =&gt; {
+    const show = () =&gt; { h.textContent = b.getAttribute(&#x27;data-hint&#x27;); }, hide = () =&gt; { h.textContent = dflt; };
+    b.addEventListener(&#x27;mouseenter&#x27;, show); b.addEventListener(&#x27;focus&#x27;, show);
+    b.addEventListener(&#x27;mouseleave&#x27;, hide); b.addEventListener(&#x27;blur&#x27;, hide);
+  });
+})();
+&lt;/script&gt;
+
+&lt;/body&gt;&lt;/html&gt;"></iframe></section>
+<section class="panel" id="p-md" role="tabpanel" aria-labelledby="t-md"><iframe title="Marker Diff" allow="clipboard-write" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;title&gt;Marker Diff by Joël Li v2&lt;/title&gt;&lt;meta charset=utf8&gt;&lt;meta name=viewport content=&quot;width=device-width,initial-scale=1,viewport-fit=cover&quot;&gt;&lt;style&gt;:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}&lt;/style&gt;&lt;style&gt;textarea::placeholder{white-space:pre-wrap;overflow-wrap:anywhere}textarea{min-height:110px !important}.wrap{grid-template-columns:minmax(0,1fr)}.wrap&gt;*{min-width:0}th,td{padding-left:8px !important;padding-right:8px !important}td.comment{min-width:200px !important}td.clip{max-width:140px !important}th{letter-spacing:.03em !important}td.tc,td.id{font-size:12.5px !important}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+
+&lt;meta name=&quot;claude:viewport-fit-sides&quot; content=&quot;cover&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Barlow+Condensed:wght@600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap&quot;&gt;
+&lt;style&gt;
+/* Layout concept: a turnover change-list sheet. Two input &quot;reels&quot; side by side (old / new),
+   a slate-style summary bar of statuses, then a ruled timecode table. */
+:root {
+  --font-display: &quot;Barlow Condensed&quot;, &quot;Arial Narrow&quot;, &quot;Helvetica Neue&quot;, sans-serif;
+  --font-body: &quot;Barlow&quot;, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif;
+  --font-mono: &quot;IBM Plex Mono&quot;, ui-monospace, Menlo, Consolas, monospace;
+
+  --bg: #eef1f5;
+  --surface: #ffffff;
+  --surface-2: #e5e9ef;
+  --ink: #141922;
+  --muted: #566275;
+  --line: #cfd6e0;
+  --accent: #2447d6;
+  --on-accent: #ffffff;
+
+  --removed: #b3261e;  --removed-bg: #fbe7e5;
+  --added: #17743a;    --added-bg: #e2f4e8;
+  --moved: #9a5400;    --moved-bg: #fdefd8;
+  --modified: #6637c2; --modified-bg: #eee7fb;
+  --same: #566275;     --same-bg: #e5e9ef;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme=&quot;light&quot;]) {
+    --bg: #10141a; --surface: #171d25; --surface-2: #212934; --ink: #e7ebf1; --muted: #98a3b4; --line: #2b3441;
+    --accent: #86a1ff; --on-accent: #0a1020;
+    --removed: #ff8f86;  --removed-bg: #3a1d20;
+    --added: #72d68f;    --added-bg: #15301f;
+    --moved: #f4b862;    --moved-bg: #372911;
+    --modified: #bba2ff; --modified-bg: #2a2148;
+    --same: #98a3b4;     --same-bg: #212934;
+    color-scheme: dark;
+  }
+}
+:root[data-theme=&quot;dark&quot;] {
+  --bg: #10141a; --surface: #171d25; --surface-2: #212934; --ink: #e7ebf1; --muted: #98a3b4; --line: #2b3441;
+  --accent: #86a1ff; --on-accent: #0a1020;
+  --removed: #ff8f86;  --removed-bg: #3a1d20;
+  --added: #72d68f;    --added-bg: #15301f;
+  --moved: #f4b862;    --moved-bg: #372911;
+  --modified: #bba2ff; --modified-bg: #2a2148;
+  --same: #98a3b4;     --same-bg: #212934;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--font-body);
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 22px; }
+h1, h2 { font-family: var(--font-display); font-weight: 700; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; }
+h2 { font-size: 1.25rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.kicker { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.byline { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 14px 0 0; font: 500 13px/1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+a.linkbtn { font: 600 12.5px/1 var(--font-body); letter-spacing: 0.03em; text-transform: none; text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 8px 11px; display: inline-flex; align-items: center; gap: 6px; }
+a.linkbtn:hover { background: var(--surface-2); }
+a.linkbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lede { max-width: 62ch; color: var(--muted); margin: 12px 0 0; }
+
+.inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+.reel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; display: grid; gap: 10px; padding: 14px; min-width: 0; }
+.reel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.reel-head h2 { display: flex; align-items: center; gap: 10px; }
+.tag { font: 500 11px/1 var(--font-mono); letter-spacing: 0.06em; padding: 4px 6px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); }
+textarea { width: 100%; min-height: 190px; resize: vertical; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 10px; font: 400 12.5px/1.5 var(--font-mono); white-space: pre; overflow: auto; }
+textarea:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible, .filebtn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.info { margin: 0; font: 400 12.5px/1.4 var(--font-mono); color: var(--muted); min-height: 1.4em; }
+.info.warn { color: var(--removed); }
+
+button, .filebtn { font: 600 13px/1 var(--font-body); letter-spacing: 0.03em; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 9px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+button:hover, .filebtn:hover { background: var(--surface-2); }
+.filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.filebtn { position: relative; }
+button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+button.primary:hover { filter: brightness(1.08); background: var(--accent); }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.options { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: end; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field label { font: 500 11px/1 var(--font-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+select, input[type=&quot;text&quot;] { background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; font: 400 13px/1.2 var(--font-mono); min-width: 0; }
+input[type=&quot;text&quot;] { width: min(100%, 250px); }
+input:disabled { opacity: 0.5; }
+.options .spacer { flex: 1 1 0; }
+.fname { margin: 0; font: 400 12px/1.3 var(--font-mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fname strong { color: var(--ink); font-weight: 500; }
+.colorbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
+.colorbar .lab { font: 500 11px/1 var(--font-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.colors { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+.check { display: inline-flex; align-items: center; gap: 7px; font: 400 13px/1.2 var(--font-body); color: var(--ink); cursor: pointer; }
+.check input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+
+.summary { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.chip { flex: 1 1 150px; display: grid; grid-template-columns: 1fr auto; column-gap: 10px; row-gap: 3px; align-items: start; text-align: left; padding: 10px 12px; border-radius: 5px; border: 1px solid transparent; background: var(--chip-bg); color: var(--chip-fg); opacity: 0.55; }
+.chip:hover { background: var(--chip-bg); filter: brightness(0.97); }
+.chip[aria-pressed=&quot;true&quot;] { opacity: 1; border-color: var(--chip-fg); }
+.chip .l { grid-column: 1; grid-row: 1; font: 500 11px/1.1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+.chip .p { grid-column: 1; grid-row: 2; font: 400 11px/1.2 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip .n { grid-column: 2; grid-row: 1 / span 2; align-self: center; font: 700 2rem/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.chip .track { grid-column: 1 / -1; grid-row: 3; margin-top: 8px; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--chip-fg) 22%, transparent); overflow: hidden; }
+.chip .fill { display: block; height: 100%; background: var(--chip-fg); border-radius: 2px; min-width: 0; }
+.chip[data-s=&quot;removed&quot;], .pill[data-s=&quot;removed&quot;] { --chip-bg: var(--removed-bg); --chip-fg: var(--removed); }
+.chip[data-s=&quot;added&quot;], .pill[data-s=&quot;added&quot;] { --chip-bg: var(--added-bg); --chip-fg: var(--added); }
+.chip[data-s=&quot;moved&quot;], .pill[data-s=&quot;moved&quot;] { --chip-bg: var(--moved-bg); --chip-fg: var(--moved); }
+.chip[data-s=&quot;modified&quot;], .pill[data-s=&quot;modified&quot;] { --chip-bg: var(--modified-bg); --chip-fg: var(--modified); }
+.chip[data-s=&quot;same&quot;], .pill[data-s=&quot;same&quot;] { --chip-bg: var(--same-bg); --chip-fg: var(--same); }
+
+.statbar { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: grid; gap: 10px; }
+.statbar[hidden] { display: none; }
+.bar { display: flex; height: 14px; border-radius: 3px; overflow: hidden; background: var(--surface-2); gap: 2px; }
+.bar span { background: var(--seg); min-width: 2px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0; list-style: none; font: 500 12px/1.2 var(--font-mono); color: var(--ink); }
+.legend li { display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; background: var(--seg); display: inline-block; }
+.legend b { font-weight: 500; color: var(--muted); }
+.bar [data-s=&quot;removed&quot;], .legend [data-s=&quot;removed&quot;] { --seg: var(--removed); }
+.bar [data-s=&quot;added&quot;], .legend [data-s=&quot;added&quot;] { --seg: var(--added); }
+.bar [data-s=&quot;moved&quot;], .legend [data-s=&quot;moved&quot;] { --seg: var(--moved); }
+.bar [data-s=&quot;modified&quot;], .legend [data-s=&quot;modified&quot;] { --seg: var(--modified); }
+.bar [data-s=&quot;same&quot;], .legend [data-s=&quot;same&quot;] { --seg: var(--same); }
+.tablewrap { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: auto; max-height: min(58vh, 560px); }
+table { border-collapse: collapse; width: 100%; min-width: 720px; }
+th { text-align: left; font: 500 11px/1 var(--font-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding: 11px 12px; box-shadow: inset 0 -2px 0 var(--ink); background: var(--surface); position: sticky; top: 0; z-index: 1; white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.tc, td.delta { font: 400 13px/1.4 var(--font-mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.id { font: 500 13px/1.4 var(--font-mono); white-space: nowrap; }
+.pill { display: inline-block; font: 500 11px/1 var(--font-mono); letter-spacing: 0.05em; text-transform: uppercase; padding: 5px 7px; border-radius: 3px; background: var(--chip-bg); color: var(--chip-fg); white-space: nowrap; }
+.dim { color: var(--muted); }
+del { color: var(--muted); text-decoration-thickness: 1px; }
+ins { text-decoration: none; background: var(--modified-bg); color: var(--ink); padding: 0 2px; border-radius: 2px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--line); margin-right: 6px; vertical-align: -1px; }
+.empty { padding: 28px 16px; color: var(--muted); text-align: center; }
+
+.export { display: grid; gap: 10px; }
+.export p { margin: 0; color: var(--muted); max-width: 70ch; }
+#outWrap { display: grid; gap: 6px; }
+#outText { min-height: 130px; }
+.foot { color: var(--muted); font-size: 13px; max-width: 75ch; }
+@media (prefers-reduced-motion: no-preference) { button, .chip { transition: background 0.12s, opacity 0.12s; } }
+&lt;/style&gt;
+
+&lt;main class=&quot;wrap&quot;&gt;
+  &lt;header&gt;
+    &lt;p class=&quot;kicker&quot;&gt;Assistant monteur · Avid Media Composer&lt;/p&gt;
+    &lt;h1&gt;Marker Diff&lt;/h1&gt;
+    
+    &lt;p class=&quot;lede&quot;&gt;Colle ou charge l&#x27;export de markers de l&#x27;ancienne et de la nouvelle séquence. L&#x27;outil indique quels markers ont disparu, sont apparus, ont bougé ou ont changé de commentaire, de couleur ou de piste.&lt;/p&gt;
+  &lt;/header&gt;
+
+  &lt;section class=&quot;inputs&quot; aria-label=&quot;Exports de markers&quot;&gt;
+    &lt;div class=&quot;reel&quot;&gt;
+      &lt;div class=&quot;reel-head&quot;&gt;
+        &lt;h2&gt;&lt;span class=&quot;tag&quot;&gt;OLD&lt;/span&gt; Ancienne séquence&lt;/h2&gt;
+        &lt;div class=&quot;actions&quot;&gt;
+          &lt;label class=&quot;filebtn&quot;&gt;Charger un .txt&lt;input type=&quot;file&quot; id=&quot;oldFile&quot; accept=&quot;.txt,.tsv,text/plain&quot;&gt;&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;p class=&quot;fname&quot; id=&quot;oldName&quot; hidden&gt;&lt;/p&gt;
+      &lt;textarea id=&quot;oldText&quot; spellcheck=&quot;false&quot; aria-label=&quot;Markers de l&#x27;ancienne séquence&quot; placeholder=&quot;Colle ici l&#x27;export de markers (Fenêtre Markers &gt; Export &gt; .txt)&quot;&gt;&lt;/textarea&gt;
+      &lt;p class=&quot;info&quot; id=&quot;oldInfo&quot;&gt;&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;reel&quot;&gt;
+      &lt;div class=&quot;reel-head&quot;&gt;
+        &lt;h2&gt;&lt;span class=&quot;tag&quot;&gt;NEW&lt;/span&gt; Nouvelle séquence&lt;/h2&gt;
+        &lt;div class=&quot;actions&quot;&gt;
+          &lt;label class=&quot;filebtn&quot;&gt;Charger un .txt&lt;input type=&quot;file&quot; id=&quot;newFile&quot; accept=&quot;.txt,.tsv,text/plain&quot;&gt;&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;p class=&quot;fname&quot; id=&quot;newName&quot; hidden&gt;&lt;/p&gt;
+      &lt;textarea id=&quot;newText&quot; spellcheck=&quot;false&quot; aria-label=&quot;Markers de la nouvelle séquence&quot; placeholder=&quot;Colle ici l&#x27;export de markers (Fenêtre Markers &gt; Export &gt; .txt)&quot;&gt;&lt;/textarea&gt;
+      &lt;p class=&quot;info&quot; id=&quot;newInfo&quot;&gt;&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;options&quot; aria-label=&quot;Réglages&quot;&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;keyMode&quot;&gt;Associer les markers par&lt;/label&gt;
+      &lt;select id=&quot;keyMode&quot;&gt;
+        &lt;option value=&quot;id&quot;&gt;ID dans le commentaire&lt;/option&gt;
+        &lt;option value=&quot;comment&quot;&gt;Commentaire entier&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;idPreset&quot;&gt;Format de l&#x27;ID&lt;/label&gt;
+      &lt;select id=&quot;idPreset&quot;&gt;
+        &lt;option value=&quot;\d{3}-\d{3}&quot; selected&gt;001-010&lt;/option&gt;
+        &lt;option value=&quot;[A-Za-z]{2,6}[_-]\d{3}[_-]\d{3}&quot;&gt;ADV-001-010&lt;/option&gt;
+        &lt;option value=&quot;&quot;&gt;Personnalisé&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;idRegex&quot;&gt;Motif de l&#x27;ID (regex)&lt;/label&gt;
+      &lt;input type=&quot;text&quot; id=&quot;idRegex&quot; value=&quot;\d{3}-\d{3}&quot; spellcheck=&quot;false&quot; autocomplete=&quot;off&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;fps&quot;&gt;Cadence&lt;/label&gt;
+      &lt;select id=&quot;fps&quot;&gt;
+        &lt;option value=&quot;23.976&quot;&gt;23.976&lt;/option&gt;
+        &lt;option value=&quot;24&quot; selected&gt;24&lt;/option&gt;
+        &lt;option value=&quot;25&quot;&gt;25&lt;/option&gt;
+        &lt;option value=&quot;29.97&quot;&gt;29.97&lt;/option&gt;
+        &lt;option value=&quot;30&quot;&gt;30&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;spacer&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;actions&quot;&gt;
+      &lt;button type=&quot;button&quot; id=&quot;runBtn&quot; class=&quot;primary&quot;&gt;Comparer&lt;/button&gt;
+      &lt;button type=&quot;button&quot; id=&quot;clearBtn&quot;&gt;Vider&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;colorbar&quot; id=&quot;colorBar&quot; aria-label=&quot;Filtre par couleur&quot; hidden&gt;
+    &lt;span class=&quot;lab&quot;&gt;Couleurs de markers à inclure&lt;/span&gt;
+    &lt;div class=&quot;colors&quot; id=&quot;colorList&quot;&gt;&lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section aria-label=&quot;Résumé&quot;&gt;&lt;div class=&quot;summary&quot; id=&quot;summary&quot;&gt;&lt;/div&gt;&lt;/section&gt;
+
+  &lt;section aria-label=&quot;Résultats&quot;&gt;
+    &lt;div class=&quot;tablewrap&quot; id=&quot;results&quot;&gt;&lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;export&quot; aria-label=&quot;Export&quot;&gt;
+    &lt;h2&gt;Exporter&lt;/h2&gt;
+    &lt;p&gt;Le fichier .txt contient les lignes affichées, prêtes à importer dans la nouvelle séquence (Markers &gt; Import) : rouge supprimé, vert nouveau, jaune déplacé, magenta modifié. Les statuts et les couleurs désactivés plus haut n&#x27;y figurent pas.&lt;/p&gt;
+    &lt;div class=&quot;actions&quot;&gt;
+      &lt;button type=&quot;button&quot; id=&quot;downloadAvid&quot; class=&quot;primary&quot;&gt;Télécharger les markers Avid (.txt)&lt;/button&gt;
+      &lt;button type=&quot;button&quot; id=&quot;downloadRemoved&quot;&gt;Télécharger les markers supprimés (.txt)&lt;/button&gt;
+      &lt;button type=&quot;button&quot; id=&quot;copyReport&quot;&gt;Copier le rapport (TSV)&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;p class=&quot;info&quot; id=&quot;dlMsg&quot; role=&quot;status&quot;&gt;&lt;/p&gt;
+    &lt;div id=&quot;outWrap&quot; hidden&gt;
+      &lt;p class=&quot;info&quot; id=&quot;outMsg&quot;&gt;&lt;/p&gt;
+      &lt;textarea id=&quot;outText&quot; readonly spellcheck=&quot;false&quot; aria-label=&quot;Texte à copier&quot;&gt;&lt;/textarea&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;p class=&quot;foot&quot;&gt;Les timecodes sont comparés en images à partir de la cadence choisie (calcul sans correction drop frame). Un marker supprimé est placé à sa position dans l&#x27;ancienne séquence. Rien n&#x27;est envoyé : la comparaison se fait dans ton navigateur.&lt;/p&gt;
+&lt;/main&gt;
+
+&lt;script&gt;
+//#core-start
+const COLORS = [&#x27;red&#x27;, &#x27;green&#x27;, &#x27;blue&#x27;, &#x27;cyan&#x27;, &#x27;magenta&#x27;, &#x27;yellow&#x27;, &#x27;black&#x27;, &#x27;white&#x27;];
+const TC_RE = /^\d{2}[:;]\d{2}[:;]\d{2}[:;]\d{2}$/;
+const TC_FIND = /\d{2}[:;]\d{2}[:;]\d{2}[:;]\d{2}/;
+
+function tcToFrames(tc, fps) {
+  const p = tc.split(/[:;]/).map(Number);
+  const nf = Math.round(fps) || 25;
+  return ((p[0] * 60 + p[1]) * 60 + p[2]) * nf + p[3];
+}
+
+function parseLine(raw) {
+  const f = raw.split(&#x27;\t&#x27;).map(s =&gt; s.trim());
+  const i = f.findIndex(x =&gt; TC_RE.test(x));
+  let user, tc, track = &#x27;&#x27;, color = &#x27;&#x27;, rest;
+  if (i &gt;= 0 &amp;&amp; f.length &gt; i + 1) {
+    user = f.slice(0, i).join(&#x27; &#x27;);
+    tc = f[i];
+    track = f[i + 1] || &#x27;&#x27;;
+    let j = i + 2;
+    if (f[j] &amp;&amp; COLORS.includes(f[j].toLowerCase())) { color = f[j].toLowerCase(); j++; }
+    rest = f.slice(j);
+  } else {
+    const mm = raw.match(TC_FIND);
+    if (!mm) return null;
+    user = raw.slice(0, mm.index).trim();
+    tc = mm[0];
+    const after = raw.slice(mm.index + tc.length).trim().split(/\s+/).filter(Boolean);
+    track = after.shift() || &#x27;&#x27;;
+    if (after[0] &amp;&amp; COLORS.includes(after[0].toLowerCase())) color = after.shift().toLowerCase();
+    rest = [after.join(&#x27; &#x27;)];
+  }
+  let duration = &#x27;&#x27;;
+  if (rest.length &gt; 1 &amp;&amp; /^\d+$/.test(rest[rest.length - 1])) duration = rest.pop();
+  const comment = rest.join(&#x27; &#x27;).replace(/\s+/g, &#x27; &#x27;).trim();
+  return { user, tc, track, color, comment, duration };
+}
+
+function parseMarkers(text) {
+  const markers = [];
+  let skipped = 0;
+  for (const raw of String(text || &#x27;&#x27;).split(/\r\n|\n|\r/)) {
+    if (!raw.trim()) continue;
+    const m = parseLine(raw);
+    if (m) markers.push(m); else skipped++;
+  }
+  return { markers, skipped };
+}
+
+const normText = s =&gt; String(s || &#x27;&#x27;).toLowerCase().replace(/\s+/g, &#x27; &#x27;).trim();
+
+function makeKey(m, opts) {
+  if (opts.mode === &#x27;id&#x27; &amp;&amp; opts.re) {
+    const mm = m.comment.match(opts.re);
+    if (mm) return { key: &#x27;id:&#x27; + mm[0].toUpperCase().replace(/[^A-Z0-9]/g, &#x27;&#x27;), label: mm[0], hasId: true };
+  }
+  return { key: &#x27;txt:&#x27; + normText(m.comment), label: &#x27;&#x27;, hasId: false };
+}
+
+function compareMarkers(oldList, newList, opts) {
+  const fps = Math.round(opts.fps) || 25;
+  const prep = list =&gt; list.map(m =&gt; Object.assign({}, m, makeKey(m, opts), { frames: tcToFrames(m.tc, fps) }));
+  const O = prep(oldList), N = prep(newList);
+  const groups = new Map();
+  const put = (arr, side) =&gt; arr.forEach(m =&gt; {
+    if (!groups.has(m.key)) groups.set(m.key, { o: [], n: [] });
+    groups.get(m.key)[side].push(m);
+  });
+  put(O, &#x27;o&#x27;); put(N, &#x27;n&#x27;);
+
+  const rows = [];
+  for (const g of groups.values()) {
+    const combos = [];
+    g.o.forEach((o, oi) =&gt; g.n.forEach((n, ni) =&gt; combos.push({ oi, ni, d: Math.abs(o.frames - n.frames) })));
+    combos.sort((a, b) =&gt; a.d - b.d || a.oi - b.oi || a.ni - b.ni);
+    const usedO = new Set(), usedN = new Set(), pairs = [];
+    for (const c of combos) {
+      if (usedO.has(c.oi) || usedN.has(c.ni)) continue;
+      usedO.add(c.oi); usedN.add(c.ni);
+      pairs.push([g.o[c.oi], g.n[c.ni]]);
+    }
+    g.o.forEach((o, oi) =&gt; { if (!usedO.has(oi)) rows.push({ status: &#x27;removed&#x27;, id: o.label, old: o, new: null, delta: 0, changes: [] }); });
+    g.n.forEach((n, ni) =&gt; { if (!usedN.has(ni)) rows.push({ status: &#x27;added&#x27;, id: n.label, old: null, new: n, delta: 0, changes: [] }); });
+    for (const [o, n] of pairs) {
+      const delta = n.frames - o.frames;
+      const changes = [];
+      if (normText(o.comment) !== normText(n.comment)) changes.push(&#x27;comment&#x27;);
+      if (o.color !== n.color) changes.push(&#x27;couleur&#x27;);
+      if (o.track !== n.track) changes.push(&#x27;piste&#x27;);
+      const status = delta !== 0 ? &#x27;moved&#x27; : (changes.length ? &#x27;modified&#x27; : &#x27;same&#x27;);
+      rows.push({ status, id: n.label || o.label, old: o, new: n, delta, changes });
+    }
+  }
+  const ref = r =&gt; (r.new ? r.new.frames : r.old.frames);
+  rows.sort((a, b) =&gt; ref(a) - ref(b) || a.status.localeCompare(b.status));
+  const counts = { removed: 0, added: 0, moved: 0, modified: 0, same: 0 };
+  rows.forEach(r =&gt; counts[r.status]++);
+  return { rows, counts };
+}
+
+function fmtDelta(d, fps) {
+  if (!d) return &#x27;0&#x27;;
+  const nf = Math.round(fps) || 25;
+  const sign = d &gt; 0 ? &#x27;+&#x27; : &#x27;-&#x27;;
+  const a = Math.abs(d);
+  const s = Math.floor(a / nf), f = a % nf;
+  return sign + a + &#x27; f&#x27; + (s ? &#x27; (&#x27; + sign + s + &#x27;s &#x27; + f + &#x27;f)&#x27; : &#x27;&#x27;);
+}
+
+const STATUS_LABEL = { removed: &#x27;Supprimé&#x27;, added: &#x27;Nouveau&#x27;, moved: &#x27;Déplacé&#x27;, modified: &#x27;Modifié&#x27;, same: &#x27;Inchangé&#x27; };
+const clean = s =&gt; String(s || &#x27;&#x27;).replace(/[\t\r\n]+/g, &#x27; &#x27;).trim();
+
+function reportTSV(rows, fps) {
+  const head = [&#x27;Statut&#x27;, &#x27;ID&#x27;, &#x27;TC ancien&#x27;, &#x27;TC nouveau&#x27;, &#x27;Delta&#x27;, &#x27;Couleur ancien&#x27;, &#x27;Couleur nouveau&#x27;, &#x27;Commentaire ancien&#x27;, &#x27;Commentaire nouveau&#x27;];
+  const lines = [head.join(&#x27;\t&#x27;)];
+  rows.forEach(r =&gt; lines.push([
+    STATUS_LABEL[r.status], r.id, r.old ? r.old.tc : &#x27;&#x27;, r.new ? r.new.tc : &#x27;&#x27;,
+    r.old &amp;&amp; r.new ? fmtDelta(r.delta, fps) : &#x27;&#x27;,
+    r.old ? r.old.color : &#x27;&#x27;, r.new ? r.new.color : &#x27;&#x27;,
+    clean(r.old ? r.old.comment : &#x27;&#x27;), clean(r.new ? r.new.comment : &#x27;&#x27;)
+  ].map(clean).join(&#x27;\t&#x27;)));
+  return lines.join(&#x27;\n&#x27;);
+}
+
+function avidMarkers(rows, fps) {
+  const out = [];
+  rows.forEach(r =&gt; {
+    if (r.status === &#x27;same&#x27;) return;
+    let m, color, text;
+    if (r.status === &#x27;removed&#x27;) { m = r.old; color = &#x27;red&#x27;; text = &#x27;SUPPRIMÉ &#x27; + m.comment; }
+    else if (r.status === &#x27;added&#x27;) { m = r.new; color = &#x27;green&#x27;; text = &#x27;NOUVEAU &#x27; + m.comment; }
+    else if (r.status === &#x27;moved&#x27;) { m = r.new; color = &#x27;yellow&#x27;; text = &#x27;DÉPLACÉ &#x27; + fmtDelta(r.delta, fps) + &#x27; &#x27; + m.comment; }
+    else { m = r.new; color = &#x27;magenta&#x27;; text = &#x27;MODIFIÉ (&#x27; + r.changes.join(&#x27;, &#x27;) + &#x27;) &#x27; + m.comment; }
+    out.push([&#x27;DIFF&#x27;, m.tc, m.track || &#x27;V1&#x27;, color, clean(text), &#x27;1&#x27;].join(&#x27;\t&#x27;));
+  });
+  return out.join(&#x27;\n&#x27;);
+}
+
+// Markers supprimés uniquement (présents dans l&#x27;ancienne séquence, absents de la nouvelle), à leur position ancienne.
+// Commentaire inchangé (juste le nom, ex. 001-020), sans préfixe de statut.
+function removedOnlyMarkers(rows) {
+  const out = [];
+  rows.forEach(r =&gt; {
+    if (r.status !== &#x27;removed&#x27;) return;
+    const m = r.old;
+    out.push([&#x27;DIFF&#x27;, m.tc, m.track || &#x27;V1&#x27;, &#x27;red&#x27;, clean(m.comment), &#x27;1&#x27;].join(&#x27;\t&#x27;));
+  });
+  return out.join(&#x27;\n&#x27;);
+}
+
+function statPercents(counts) {
+  const keys = [&#x27;removed&#x27;, &#x27;added&#x27;, &#x27;moved&#x27;, &#x27;modified&#x27;, &#x27;same&#x27;];
+  const total = keys.reduce((a, k) =&gt; a + counts[k], 0);
+  return { total, items: keys.map(k =&gt; ({ key: k, n: counts[k], pct: total ? counts[k] * 100 / total : 0 })) };
+}
+//#core-end
+
+/* ---------- UI ---------- */
+const $ = id =&gt; document.getElementById(id);
+const colorOn = {};
+const fileNames = { oldText: &#x27;&#x27;, newText: &#x27;&#x27; };
+const fileEdited = { oldText: false, newText: false };
+function showName(taId) {
+  const el = $(taId.replace(&#x27;Text&#x27;, &#x27;Name&#x27;));
+  if (!$(taId).value.trim()) { fileNames[taId] = &#x27;&#x27;; fileEdited[taId] = false; el.hidden = true; return; }
+  const nm = fileNames[taId];
+  el.hidden = false;
+  el.title = nm;
+  el.innerHTML = nm ? &#x27;Fichier : &lt;strong&gt;&#x27; + esc(nm) + &#x27;&lt;/strong&gt;&#x27; + (fileEdited[taId] ? &#x27; (modifié)&#x27; : &#x27;&#x27;) : &#x27;Texte collé&#x27;;
+}
+let seenColors = [];
+const filter = { removed: true, added: true, moved: true, modified: true, same: false };
+let last = { rows: [], counts: null, fps: 25 };
+
+const COLOR_HEX = { red: &#x27;#e53935&#x27;, green: &#x27;#2e9e4f&#x27;, blue: &#x27;#2f6fe0&#x27;, cyan: &#x27;#12b5c9&#x27;, magenta: &#x27;#c2379d&#x27;, yellow: &#x27;#e8b923&#x27;, black: &#x27;#111&#x27;, white: &#x27;#fff&#x27; };
+const esc = s =&gt; String(s == null ? &#x27;&#x27; : s).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g, c =&gt; ({ &#x27;&amp;&#x27;: &#x27;&amp;amp;&#x27;, &#x27;&lt;&#x27;: &#x27;&amp;lt;&#x27;, &#x27;&gt;&#x27;: &#x27;&amp;gt;&#x27;, &#x27;&quot;&#x27;: &#x27;&amp;quot;&#x27;, &quot;&#x27;&quot;: &#x27;&amp;#39;&#x27; }[c]));
+const dot = c =&gt; c ? &#x27;&lt;span class=&quot;dot&quot; style=&quot;background:&#x27; + (COLOR_HEX[c] || &#x27;transparent&#x27;) + &#x27;&quot;&gt;&lt;/span&gt;&#x27; + esc(c) : &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;;
+
+function setInfo(el, res, text) {
+  if (!text.trim()) { el.textContent = &#x27;&#x27;; el.className = &#x27;info&#x27;; return; }
+  if (!res.markers.length) {
+    el.textContent = &#x27;Aucun marker reconnu. Chaque ligne doit contenir un timecode (HH:MM:SS:FF).&#x27;;
+    el.className = &#x27;info warn&#x27;;
+    return;
+  }
+  el.textContent = res.markers.length + &#x27; marker&#x27; + (res.markers.length &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; lu&#x27; + (res.markers.length &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) +
+    (res.skipped ? &#x27; · &#x27; + res.skipped + &#x27; ligne&#x27; + (res.skipped &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; ignorée&#x27; + (res.skipped &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) : &#x27;&#x27;);
+  el.className = &#x27;info&#x27;;
+}
+
+function renderSummary() {
+  const c = last.counts || { removed: 0, added: 0, moved: 0, modified: 0, same: 0 };
+  const labels = { removed: &#x27;Supprimés&#x27;, added: &#x27;Nouveaux&#x27;, moved: &#x27;Déplacés&#x27;, modified: &#x27;Modifiés&#x27;, same: &#x27;Inchangés&#x27; };
+  const total = c.removed + c.added + c.moved + c.modified + c.same;
+  $(&#x27;summary&#x27;).innerHTML = [&#x27;removed&#x27;, &#x27;added&#x27;, &#x27;moved&#x27;, &#x27;modified&#x27;, &#x27;same&#x27;].map(s =&gt;
+    &#x27;&lt;button type=&quot;button&quot; class=&quot;chip&quot; data-s=&quot;&#x27; + s + &#x27;&quot; aria-pressed=&quot;&#x27; + filter[s] + &#x27;&quot;&gt;&lt;span class=&quot;l&quot;&gt;&#x27; + labels[s] + &#x27;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&#x27; + fmtPct(total ? c[s] * 100 / total : 0) + &#x27; du total&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;&#x27; + c[s] + &#x27;&lt;/span&gt;&lt;span class=&quot;track&quot;&gt;&lt;span class=&quot;fill&quot; style=&quot;width:&#x27; + (total ? c[s] * 100 / total : 0) + &#x27;%&quot;&gt;&lt;/span&gt;&lt;/span&gt;&lt;/button&gt;&#x27;
+  ).join(&#x27;&#x27;);
+}
+
+const fmtPct = p =&gt; Math.round(p) + &#x27; %&#x27;;
+function renderStats() {
+  const box = $(&#x27;statbar&#x27;);
+  if (!last.counts) { box.hidden = true; return; }
+  const st = statPercents(last.counts);
+  if (!st.total) { box.hidden = true; return; }
+  box.hidden = false;
+  const labels = { removed: &#x27;Supprimés&#x27;, added: &#x27;Nouveaux&#x27;, moved: &#x27;Déplacés&#x27;, modified: &#x27;Modifiés&#x27;, same: &#x27;Inchangés&#x27; };
+  $(&#x27;barSegs&#x27;).innerHTML = st.items.filter(i =&gt; i.n).map(i =&gt; &#x27;&lt;span data-s=&quot;&#x27; + i.key + &#x27;&quot; style=&quot;flex:&#x27; + i.n + &#x27; 1 0&quot; title=&quot;&#x27; + labels[i.key] + &#x27; : &#x27; + fmtPct(i.pct) + &#x27;&quot;&gt;&lt;/span&gt;&#x27;).join(&#x27;&#x27;);
+  $(&#x27;barLegend&#x27;).innerHTML = st.items.map(i =&gt; &#x27;&lt;li data-s=&quot;&#x27; + i.key + &#x27;&quot;&gt;&lt;i&gt;&lt;/i&gt;&#x27; + labels[i.key] + &#x27; &#x27; + fmtPct(i.pct) + &#x27; &lt;b&gt;(&#x27; + i.n + &#x27;/&#x27; + st.total + &#x27;)&lt;/b&gt;&lt;/li&gt;&#x27;).join(&#x27;&#x27;);
+}
+
+function renderColors(colors) {
+  seenColors = colors;
+  colors.forEach(c =&gt; { if (!(c in colorOn)) colorOn[c] = true; });
+  $(&#x27;colorBar&#x27;).hidden = !colors.length;
+  $(&#x27;colorList&#x27;).innerHTML = colors.map(c =&gt;
+    &#x27;&lt;label class=&quot;check&quot;&gt;&lt;input type=&quot;checkbox&quot; data-c=&quot;&#x27; + esc(c) + &#x27;&quot;&#x27; + (colorOn[c] ? &#x27; checked&#x27; : &#x27;&#x27;) + &#x27;&gt;&#x27; + (c ? dot(c) : &#x27;&lt;span class=&quot;dim&quot;&gt;sans couleur&lt;/span&gt;&#x27;) + &#x27;&lt;/label&gt;&#x27;
+  ).join(&#x27;&#x27;);
+}
+
+function visibleRows() { return last.rows.filter(r =&gt; filter[r.status]); }
+
+function renderTable(hasInput) {
+  const box = $(&#x27;results&#x27;);
+  if (!hasInput) {
+    box.innerHTML = &#x27;&lt;div class=&quot;empty&quot;&gt;Colle ou charge deux exports de markers pour voir les différences ici.&lt;/div&gt;&#x27;;
+    return;
+  }
+  const rows = visibleRows();
+  if (!rows.length) {
+    box.innerHTML = &#x27;&lt;div class=&quot;empty&quot;&gt;&#x27; + (last.rows.length ? &#x27;Aucune ligne pour les statuts sélectionnés. Active un filtre ci-dessus.&#x27; : &#x27;Aucun marker pour les couleurs cochées.&#x27;) + &#x27;&lt;/div&gt;&#x27;;
+    return;
+  }
+  const fps = last.fps;
+  const body = rows.map(r =&gt; {
+    const o = r.old, n = r.new;
+    let comment;
+    if (r.status === &#x27;modified&#x27; &amp;&amp; r.changes.includes(&#x27;comment&#x27;)) comment = &#x27;&lt;del&gt;&#x27; + esc(o.comment) + &#x27;&lt;/del&gt;&lt;br&gt;&lt;ins&gt;&#x27; + esc(n.comment) + &#x27;&lt;/ins&gt;&#x27;;
+    else comment = esc((n || o).comment) || &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;;
+    let color;
+    if (o &amp;&amp; n &amp;&amp; o.color !== n.color) color = dot(o.color) + &#x27; &lt;span class=&quot;dim&quot;&gt;→&lt;/span&gt; &#x27; + dot(n.color);
+    else color = dot((n || o).color);
+    const extra = (r.status === &#x27;moved&#x27; &amp;&amp; r.changes.length) ? &#x27;&lt;br&gt;&lt;span class=&quot;dim&quot;&gt;aussi : &#x27; + esc(r.changes.join(&#x27;, &#x27;)) + &#x27;&lt;/span&gt;&#x27; : &#x27;&#x27;;
+    return &#x27;&lt;tr&gt;&lt;td&gt;&lt;span class=&quot;pill&quot; data-s=&quot;&#x27; + r.status + &#x27;&quot;&gt;&#x27; + STATUS_LABEL[r.status] + &#x27;&lt;/span&gt;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;id&quot;&gt;&#x27; + (esc(r.id) || &#x27;&lt;span class=&quot;dim&quot;&gt;sans ID&lt;/span&gt;&#x27;) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;tc&quot;&gt;&#x27; + (o ? esc(o.tc) : &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;tc&quot;&gt;&#x27; + (n ? esc(n.tc) : &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;delta&quot;&gt;&#x27; + (o &amp;&amp; n ? esc(fmtDelta(r.delta, fps)) : &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td&gt;&#x27; + color + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td&gt;&#x27; + comment + extra + &#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;;
+  }).join(&#x27;&#x27;);
+  box.innerHTML = &#x27;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Statut&lt;/th&gt;&lt;th&gt;ID&lt;/th&gt;&lt;th&gt;TC ancien&lt;/th&gt;&lt;th&gt;TC nouveau&lt;/th&gt;&lt;th&gt;Écart&lt;/th&gt;&lt;th&gt;Couleur&lt;/th&gt;&lt;th&gt;Commentaire&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&#x27; + body + &#x27;&lt;/tbody&gt;&lt;/table&gt;&#x27;;
+}
+
+function run() {
+  const fps = parseFloat($(&#x27;fps&#x27;).value) || 25;
+  let mode = $(&#x27;keyMode&#x27;).value;
+  $(&#x27;idRegex&#x27;).disabled = mode !== &#x27;id&#x27;;
+  $(&#x27;idPreset&#x27;).disabled = mode !== &#x27;id&#x27;;
+  let re = null, regexMsg = &#x27;&#x27;;
+  const src = $(&#x27;idRegex&#x27;).value.trim();
+  if (mode === &#x27;id&#x27; &amp;&amp; src) {
+    try { re = new RegExp(src, &#x27;i&#x27;); } catch (e) { regexMsg = &#x27;Motif invalide, comparaison par commentaire entier.&#x27;; }
+  }
+  if (mode === &#x27;id&#x27; &amp;&amp; !re) mode = &#x27;comment&#x27;;
+  const oText = $(&#x27;oldText&#x27;).value, nText = $(&#x27;newText&#x27;).value;
+  const o = parseMarkers(oText), n = parseMarkers(nText);
+  setInfo($(&#x27;oldInfo&#x27;), o, oText);
+  setInfo($(&#x27;newInfo&#x27;), n, nText);
+  if (regexMsg) { $(&#x27;newInfo&#x27;).textContent = regexMsg + &#x27; &#x27; + $(&#x27;newInfo&#x27;).textContent; $(&#x27;newInfo&#x27;).className = &#x27;info warn&#x27;; }
+  const hasInput = !!(o.markers.length || n.markers.length);
+  const present = new Set();
+  o.markers.concat(n.markers).forEach(mk =&gt; present.add(mk.color));
+  const found = COLORS.filter(c =&gt; present.has(c));
+  if (present.has(&#x27;&#x27;)) found.push(&#x27;&#x27;);
+  if (found.join(&#x27;|&#x27;) !== seenColors.join(&#x27;|&#x27;)) renderColors(found);
+  const res = hasInput ? compareMarkers(o.markers, n.markers, { mode, re, fps }) : { rows: [], counts: null };
+  // Un marker est gardé si sa couleur (ancienne ou nouvelle) est cochée.
+  const pass = mk =&gt; !!mk &amp;&amp; colorOn[mk.color || &#x27;&#x27;] !== false;
+  let rows = res.rows, counts = res.counts;
+  if (counts) {
+    rows = res.rows.filter(r =&gt; pass(r.old) || pass(r.new));
+    counts = { removed: 0, added: 0, moved: 0, modified: 0, same: 0 };
+    rows.forEach(r =&gt; counts[r.status]++);
+  }
+  last = { rows, counts, fps };
+  renderSummary();
+  renderTable(hasInput);
+}
+
+let timer = null;
+const later = () =&gt; { clearTimeout(timer); timer = setTimeout(run, 150); };
+
+function readFile(file, target) {
+  const rd = new FileReader();
+  rd.onload = () =&gt; {
+    let txt = String(rd.result || &#x27;&#x27;);
+    if (txt.indexOf(String.fromCharCode(65533)) &gt;= 0) {
+      const rd2 = new FileReader();
+      rd2.onload = () =&gt; { target.value = String(rd2.result || &#x27;&#x27;); fileNames[target.id] = file.name; fileEdited[target.id] = false; showName(target.id); run(); };
+      rd2.readAsText(file, &#x27;windows-1252&#x27;);
+      return;
+    }
+    target.value = txt; fileNames[target.id] = file.name; fileEdited[target.id] = false; showName(target.id); run();
+  };
+  rd.readAsText(file, &#x27;utf-8&#x27;);
+}
+function wireFile(inputId, textId) {
+  const input = $(inputId), ta = $(textId);
+  input.addEventListener(&#x27;change&#x27;, () =&gt; { if (input.files &amp;&amp; input.files[0]) readFile(input.files[0], ta); input.value = &#x27;&#x27;; });
+  ta.addEventListener(&#x27;dragover&#x27;, e =&gt; e.preventDefault());
+  ta.addEventListener(&#x27;drop&#x27;, e =&gt; {
+    const f = e.dataTransfer &amp;&amp; e.dataTransfer.files &amp;&amp; e.dataTransfer.files[0];
+    if (f) { e.preventDefault(); readFile(f, ta); }
+  });
+  ta.addEventListener(&#x27;input&#x27;, () =&gt; { if (fileNames[textId]) fileEdited[textId] = true; showName(textId); later(); });
+}
+wireFile(&#x27;oldFile&#x27;, &#x27;oldText&#x27;);
+wireFile(&#x27;newFile&#x27;, &#x27;newText&#x27;);
+$(&#x27;idPreset&#x27;).addEventListener(&#x27;change&#x27;, () =&gt; { if ($(&#x27;idPreset&#x27;).value) $(&#x27;idRegex&#x27;).value = $(&#x27;idPreset&#x27;).value; });
+$(&#x27;idRegex&#x27;).addEventListener(&#x27;input&#x27;, () =&gt; {
+  const p = $(&#x27;idPreset&#x27;);
+  const hit = Array.from(p.options).find(o =&gt; o.value &amp;&amp; o.value === $(&#x27;idRegex&#x27;).value);
+  p.value = hit ? hit.value : &#x27;&#x27;;
+});
+[&#x27;keyMode&#x27;, &#x27;idPreset&#x27;, &#x27;idRegex&#x27;, &#x27;fps&#x27;].forEach(id =&gt; { $(id).addEventListener(&#x27;input&#x27;, later); $(id).addEventListener(&#x27;change&#x27;, later); });
+
+$(&#x27;colorList&#x27;).addEventListener(&#x27;change&#x27;, e =&gt; {
+  const t = e.target;
+  if (t &amp;&amp; t.matches &amp;&amp; t.matches(&#x27;input[data-c]&#x27;)) { colorOn[t.dataset.c] = t.checked; run(); }
+});
+
+$(&#x27;runBtn&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; { run(); $(&#x27;results&#x27;).scrollIntoView({ behavior: &#x27;smooth&#x27;, block: &#x27;start&#x27; }); });
+$(&#x27;clearBtn&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; { Object.keys(colorOn).forEach(k =&gt; { delete colorOn[k]; }); $(&#x27;oldText&#x27;).value = &#x27;&#x27;; $(&#x27;newText&#x27;).value = &#x27;&#x27;; [&#x27;oldText&#x27;, &#x27;newText&#x27;].forEach(id =&gt; { fileNames[id] = &#x27;&#x27;; showName(id); }); $(&#x27;outWrap&#x27;).hidden = true; run(); });
+$(&#x27;summary&#x27;).addEventListener(&#x27;click&#x27;, e =&gt; {
+  const b = e.target.closest(&#x27;.chip&#x27;);
+  if (!b) return;
+  filter[b.dataset.s] = !filter[b.dataset.s];
+  renderSummary(); renderTable(!!last.counts);
+});
+
+async function copyOut(text, label, hint) {
+  const ta = $(&#x27;outText&#x27;);
+  $(&#x27;outWrap&#x27;).hidden = false;
+  ta.value = text;
+  ta.focus(); ta.select();
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = false; }
+  $(&#x27;outMsg&#x27;).textContent = ok ? label + &#x27; copié. &#x27; + hint : &#x27;Sélectionne le texte ci-dessous et copie-le (Ctrl ou Cmd + C). &#x27; + hint;
+}
+$(&#x27;copyReport&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; {
+  if (!last.rows.length) { copyOut(&#x27;&#x27;, &#x27;Rapport&#x27;, &#x27;Aucune donnée à exporter.&#x27;); return; }
+  copyOut(reportTSV(visibleRows(), last.fps), &#x27;Rapport&#x27;, &#x27;Colle-le dans Excel ou Google Sheets.&#x27;);
+});
+
+// Téléchargement du .txt de markers Avid (UTF-8, fins de ligne Unix).
+// Dans claude.ai, le fichier passe par la capacité &quot;downloads&quot; ; ailleurs (GitHub Pages), par un lien de téléchargement classique.
+async function saveTxt(filename, text) {
+  let dl = null;
+  try { dl = window.claude &amp;&amp; window.claude.use ? await window.claude.use(&#x27;downloads&#x27;) : null; } catch (e) { dl = null; }
+  if (dl) { await dl.save({ filename, data: text }); return; }
+  const url = URL.createObjectURL(new Blob([text], { type: &#x27;text/plain;charset=utf-8&#x27; }));
+  const a = document.createElement(&#x27;a&#x27;);
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() =&gt; URL.revokeObjectURL(url), 2000);
+}
+async function exportTxt(text, filename, emptyMsg, okSuffix, fallbackLabel) {
+  const msg = $(&#x27;dlMsg&#x27;);
+  if (!text) { msg.textContent = emptyMsg; msg.className = &#x27;info warn&#x27;; return; }
+  const n = text.split(&#x27;\n&#x27;).length;
+  try {
+    await saveTxt(filename, text + &#x27;\n&#x27;);
+    msg.textContent = n + &#x27; marker&#x27; + (n &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; exporté&#x27; + (n &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; dans &#x27; + filename + &#x27;. &#x27; + okSuffix;
+    msg.className = &#x27;info&#x27;;
+  } catch (e) {
+    if (e &amp;&amp; e.code === &#x27;declined&#x27;) { msg.textContent = &#x27;Téléchargement annulé.&#x27;; msg.className = &#x27;info&#x27;; return; }
+    msg.textContent = &#x27;Le téléchargement a échoué. Le texte est affiché ci-dessous : enregistre-le dans un .txt.&#x27;; msg.className = &#x27;info warn&#x27;;
+    copyOut(text, fallbackLabel, &#x27;Enregistre-les dans un .txt (fins de ligne Unix).&#x27;);
+  }
+}
+$(&#x27;downloadAvid&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; exportTxt(
+  avidMarkers(visibleRows(), last.fps), &#x27;markers_changements.txt&#x27;,
+  &#x27;Aucun changement à exporter. Compare d\&#x27;abord deux séquences et garde au moins un statut actif.&#x27;,
+  &#x27;Dans Avid : Markers &gt; Import dans la nouvelle séquence.&#x27;, &#x27;Markers de changement&#x27;));
+$(&#x27;downloadRemoved&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; exportTxt(
+  removedOnlyMarkers(last.rows), &#x27;markers_supprimes.txt&#x27;,
+  &#x27;Aucun marker supprimé à exporter. Compare d\&#x27;abord deux séquences.&#x27;,
+  &#x27;Dans Avid : Markers &gt; Import dans la séquence de ton choix.&#x27;, &#x27;Markers supprimés&#x27;));
+
+run();
+&lt;/script&gt;
+
+&lt;/body&gt;&lt;/html&gt;
+"></iframe></section>
+<section class="panel" id="p-edl" role="tabpanel" aria-labelledby="t-edl"><iframe title="EDL to SubCap" allow="clipboard-write" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;title&gt;EDL to SubCap&lt;/title&gt;&lt;meta charset=utf8&gt;&lt;meta name=viewport content=&quot;width=device-width,initial-scale=1,viewport-fit=cover&quot;&gt;&lt;style&gt;:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}&lt;/style&gt;&lt;style&gt;textarea::placeholder{white-space:pre-wrap;overflow-wrap:anywhere}textarea{min-height:110px !important}.wrap{grid-template-columns:minmax(0,1fr)}.wrap&gt;*{min-width:0}th,td{padding-left:8px !important;padding-right:8px !important}td.comment{min-width:200px !important}td.clip{max-width:140px !important}th{letter-spacing:.03em !important}td.tc,td.id{font-size:12.5px !important}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+
+&lt;meta name=&quot;claude:viewport-fit-sides&quot; content=&quot;cover&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Barlow+Condensed:wght@600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap&quot;&gt;
+&lt;style&gt;
+/* Layout concept: a conversion bench. EDL goes in on the left, options sit in a strip,
+   the caption list and the finished SubCap text come out below. */
+:root {
+  --font-display: &quot;Barlow Condensed&quot;, &quot;Arial Narrow&quot;, &quot;Helvetica Neue&quot;, sans-serif;
+  --font-body: &quot;Barlow&quot;, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif;
+  --font-mono: &quot;IBM Plex Mono&quot;, ui-monospace, Menlo, Consolas, monospace;
+
+  --bg: #eef1f5;
+  --surface: #ffffff;
+  --surface-2: #e5e9ef;
+  --ink: #141922;
+  --muted: #566275;
+  --line: #cfd6e0;
+  --accent: #2447d6;
+  --on-accent: #ffffff;
+  --warn: #b3261e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme=&quot;light&quot;]) {
+    --bg: #10141a; --surface: #171d25; --surface-2: #212934; --ink: #e7ebf1; --muted: #98a3b4; --line: #2b3441;
+    --accent: #86a1ff; --on-accent: #0a1020; --warn: #ff8f86;
+    color-scheme: dark;
+  }
+}
+:root[data-theme=&quot;dark&quot;] {
+  --bg: #10141a; --surface: #171d25; --surface-2: #212934; --ink: #e7ebf1; --muted: #98a3b4; --line: #2b3441;
+  --accent: #86a1ff; --on-accent: #0a1020; --warn: #ff8f86;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--font-body);
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 22px; }
+h1, h2 { font-family: var(--font-display); font-weight: 700; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; }
+h2 { font-size: 1.25rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.kicker { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.lede { max-width: 66ch; color: var(--muted); margin: 12px 0 0; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; display: grid; gap: 10px; padding: 14px; min-width: 0; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.panel-head h2 { display: flex; align-items: center; gap: 10px; }
+.tag { font: 500 11px/1 var(--font-mono); letter-spacing: 0.06em; padding: 4px 6px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); }
+textarea { width: 100%; min-height: 200px; resize: vertical; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 10px; font: 400 12.5px/1.5 var(--font-mono); white-space: pre; overflow: auto; }
+textarea:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible, .filebtn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.info { margin: 0; font: 400 12.5px/1.4 var(--font-mono); color: var(--muted); min-height: 1.4em; }
+.info.warn { color: var(--warn); }
+
+button, .filebtn { font: 600 13px/1 var(--font-body); letter-spacing: 0.03em; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 9px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+button:hover, .filebtn:hover { background: var(--surface-2); }
+.filebtn { position: relative; }
+.filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+button.primary:hover { filter: brightness(1.08); background: var(--accent); }
+.btn-holo-green { --holo: linear-gradient(115deg, #7dffb8, #3ee6c4 22%, #b9ff7a 44%, #e9ffa8 60%, #6df0a0 80%, #7dffb8);
+  position: relative; overflow: hidden; isolation: isolate; color: #062414; border: 0; padding: 14px 24px; font-size: 15px; letter-spacing: 0.04em;
+  background: var(--holo); background-size: 250% 100%; background-position: 0 0; box-shadow: 0 0 0 1px rgba(255,255,255,.55) inset, 0 4px 18px rgba(60,220,140,.35); }
+.btn-holo-green::before { content: &quot;&quot;; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; background-position: 150% 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.75) 50%, transparent 65%); background-size: 250% 100%; }
+.btn-holo-green:hover, .btn-holo-green:focus-visible { filter: saturate(1.25) brightness(1.05); background: var(--holo); background-size: 250% 100%; animation: holo 6s linear infinite; }
+.btn-holo-green:hover::before, .btn-holo-green:focus-visible::before { opacity: 1; animation: holo-shine 3.2s ease-in-out infinite; }
+@keyframes holo { to { background-position: 250% 0; } }
+@keyframes holo-shine { 0% { background-position: 150% 0; } 60%, 100% { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .btn-holo-green:hover, .btn-holo-green:focus-visible, .btn-holo-green:hover::before, .btn-holo-green:focus-visible::before { animation: none; } }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.options { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: end; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field label, .field .lab { font: 500 11px/1 var(--font-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+select, input[type=&quot;text&quot;], input[type=&quot;number&quot;] { background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; font: 400 13px/1.2 var(--font-mono); min-width: 0; }
+input[type=&quot;number&quot;] { width: 84px; }
+input[type=&quot;text&quot;] { width: 130px; }
+input:disabled { opacity: 0.5; }
+.check { display: inline-flex; align-items: center; gap: 7px; font: 400 13px/1.2 var(--font-body); color: var(--ink); text-transform: none; letter-spacing: 0; cursor: pointer; }
+.check input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+.colors { display: flex; flex-wrap: wrap; gap: 6px 14px; min-height: 34px; align-items: center; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--line); }
+
+.tablewrap { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: auto; max-height: min(58vh, 560px); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; }
+th { text-align: left; font: 500 11px/1 var(--font-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding: 11px 12px; box-shadow: inset 0 -2px 0 var(--ink); background: var(--surface); position: sticky; top: 0; z-index: 1; white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.tc { font: 400 13px/1.4 var(--font-mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dim { color: var(--muted); }
+.empty { padding: 28px 16px; color: var(--muted); text-align: center; }
+
+.out { display: grid; gap: 10px; }
+.out p { margin: 0; color: var(--muted); max-width: 72ch; }
+#outText { min-height: 220px; }
+details summary { cursor: pointer; font: 500 12px/1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 6px 0; }
+details[open] summary { margin-bottom: 8px; }
+.foot { color: var(--muted); font-size: 13px; max-width: 78ch; }
+@media (prefers-reduced-motion: no-preference) { button { transition: background 0.12s; } }
+&lt;/style&gt;
+
+&lt;main class=&quot;wrap&quot;&gt;
+  &lt;header&gt;
+    &lt;p class=&quot;kicker&quot;&gt;Assistant monteur · Avid Media Composer&lt;/p&gt;
+    &lt;h1&gt;EDL to SubCap&lt;/h1&gt;
+    &lt;p class=&quot;lede&quot;&gt;Colle un EDL Avid exporté avec ses markers. Chaque marker devient un sous-titre SubCap, avec son timecode d&#x27;entrée, un timecode de sortie calculé et son commentaire comme texte.&lt;/p&gt;
+  &lt;/header&gt;
+
+  &lt;section class=&quot;panel&quot; aria-label=&quot;EDL source&quot;&gt;
+    &lt;div class=&quot;panel-head&quot;&gt;
+      &lt;h2&gt;&lt;span class=&quot;tag&quot;&gt;EDL&lt;/span&gt; Fichier source&lt;/h2&gt;
+      &lt;div class=&quot;actions&quot;&gt;
+        &lt;label class=&quot;filebtn&quot;&gt;Charger un .edl&lt;input type=&quot;file&quot; id=&quot;edlFile&quot; accept=&quot;.edl,.txt,text/plain&quot;&gt;&lt;/label&gt;
+        &lt;button type=&quot;button&quot; id=&quot;clearBtn&quot;&gt;Vider&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;textarea id=&quot;edlText&quot; spellcheck=&quot;false&quot; aria-label=&quot;Contenu de l&#x27;EDL&quot; placeholder=&quot;Colle ici l&#x27;EDL (les lignes * LOC: portent les markers)&quot;&gt;&lt;/textarea&gt;
+    &lt;p class=&quot;info&quot; id=&quot;edlInfo&quot;&gt;&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;options&quot; aria-label=&quot;Réglages&quot;&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;fps&quot;&gt;Cadence&lt;/label&gt;
+      &lt;select id=&quot;fps&quot;&gt;
+        &lt;option value=&quot;23.976&quot;&gt;23.976&lt;/option&gt;
+        &lt;option value=&quot;24&quot; selected&gt;24&lt;/option&gt;
+        &lt;option value=&quot;25&quot;&gt;25&lt;/option&gt;
+        &lt;option value=&quot;29.97&quot;&gt;29.97&lt;/option&gt;
+        &lt;option value=&quot;30&quot;&gt;30&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;mode&quot;&gt;Fin du sous-titre&lt;/label&gt;
+      &lt;select id=&quot;mode&quot;&gt;
+        &lt;option value=&quot;clip&quot; selected&gt;Durée du clip&lt;/option&gt;
+        &lt;option value=&quot;fixed&quot;&gt;Durée fixe&lt;/option&gt;
+        &lt;option value=&quot;next&quot;&gt;Jusqu&#x27;au marker suivant&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;seconds&quot; id=&quot;secLabel&quot;&gt;Durée (s)&lt;/label&gt;
+      &lt;input type=&quot;number&quot; id=&quot;seconds&quot; value=&quot;3&quot; min=&quot;0.1&quot; step=&quot;0.5&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot; id=&quot;capField&quot; hidden&gt;
+      &lt;label for=&quot;cap&quot;&gt;Durée max (s)&lt;/label&gt;
+      &lt;input type=&quot;number&quot; id=&quot;cap&quot; value=&quot;6&quot; min=&quot;0.1&quot; step=&quot;0.5&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot; id=&quot;trimField&quot;&gt;
+      &lt;span class=&quot;lab&quot;&gt;Chevauchement&lt;/span&gt;
+      &lt;label class=&quot;check&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;trim&quot; checked&gt; Couper au marker suivant&lt;/label&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;offset&quot;&gt;Soustraire (HH:MM:SS:FF)&lt;/label&gt;
+      &lt;input type=&quot;text&quot; id=&quot;offset&quot; value=&quot;00:00:00:00&quot; spellcheck=&quot;false&quot; autocomplete=&quot;off&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;wrap&quot;&gt;Largeur de ligne&lt;/label&gt;
+      &lt;input type=&quot;number&quot; id=&quot;wrap&quot; value=&quot;0&quot; min=&quot;0&quot; step=&quot;1&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;span class=&quot;lab&quot;&gt;Couleurs de markers à inclure&lt;/span&gt;
+      &lt;div class=&quot;colors&quot; id=&quot;colors&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;out&quot; aria-label=&quot;Téléchargement&quot;&gt;
+    &lt;div class=&quot;actions&quot;&gt;
+      &lt;button type=&quot;button&quot; id=&quot;dlBtn&quot; class=&quot;btn-holo-green&quot;&gt;Télécharger le .txt&lt;/button&gt;
+      &lt;button type=&quot;button&quot; id=&quot;copyBtn&quot;&gt;Copier le SubCap&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;p id=&quot;outMsg&quot;&gt;Télécharge le fichier .txt, puis importe-le dans Media Composer.&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;section aria-label=&quot;Sous-titres&quot;&gt;
+    &lt;div class=&quot;tablewrap&quot; id=&quot;results&quot;&gt;&lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;out&quot; aria-label=&quot;Fichier SubCap&quot;&gt;
+    &lt;h2&gt;Aperçu du fichier SubCap&lt;/h2&gt;
+    &lt;details id=&quot;preview&quot;&gt;
+      &lt;summary&gt;Voir le contenu du fichier&lt;/summary&gt;
+      &lt;textarea id=&quot;outText&quot; readonly spellcheck=&quot;false&quot; aria-label=&quot;Contenu du fichier SubCap&quot;&gt;&lt;/textarea&gt;
+    &lt;/details&gt;
+    &lt;p&gt;Dans Media Composer : ajoute l&#x27;effet SubCap (Effect Palette, Generator) sur une piste vidéo au-dessus de la timeline, ouvre l&#x27;Effect Editor, clique sur Import Caption Data et choisis le type Avid DS Caption File (*.txt).&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;p class=&quot;foot&quot;&gt;Les timecodes du SubCap doivent correspondre à ceux de la timeline : garde « Soustraire » à 00:00:00:00 si ta séquence démarre à l&#x27;heure de l&#x27;EDL. Les calculs se font sans correction drop frame. Les markers au même timecode sont regroupés en un seul sous-titre. Rien n&#x27;est envoyé : tout se passe dans ton navigateur.&lt;/p&gt;
+&lt;/main&gt;
+
+&lt;script&gt;
+//#core-start
+const EDL_LOC = /^\s*\*\s*LOC:\s*(\d{2}[:;]\d{2}[:;]\d{2}[:;]\d{2})\s+([A-Za-z]+)\s*(.*)$/;
+
+function parseEdlMarkers(text) {
+  const markers = [];
+  let events = 0;
+  let curEnd = null; // fin (record out) du clip auquel appartiennent les markers qui suivent
+  for (const raw of String(text || &#x27;&#x27;).split(/\r\n|\n|\r/)) {
+    const m = raw.match(EDL_LOC);
+    if (m) markers.push({ tc: m[1], color: m[2].toUpperCase(), text: m[3].replace(/\s+/g, &#x27; &#x27;).trim(), end: curEnd });
+    else if (/^\s*\d{3,}\s+\S+/.test(raw)) {
+      events++;
+      const t = raw.match(/\d{2}[:;]\d{2}[:;]\d{2}[:;]\d{2}/g);
+      curEnd = t &amp;&amp; t.length &gt;= 4 ? t[t.length - 1] : null;
+    }
+  }
+  return { markers, events };
+}
+
+function tcToFrames(tc, fps) {
+  const p = String(tc).split(/[:;]/).map(Number);
+  const nf = Math.round(fps) || 24;
+  return ((p[0] * 60 + p[1]) * 60 + p[2]) * nf + p[3];
+}
+
+function framesToTc(fr, fps, sep) {
+  const nf = Math.round(fps) || 24;
+  const p = n =&gt; String(n).padStart(2, &#x27;0&#x27;);
+  const f = fr % nf;
+  let s = Math.floor(fr / nf);
+  const ss = s % 60;
+  s = Math.floor(s / 60);
+  const mm = s % 60;
+  const hh = Math.floor(s / 60);
+  return p(hh) + &#x27;:&#x27; + p(mm) + &#x27;:&#x27; + p(ss) + (sep || &#x27;:&#x27;) + p(f);
+}
+
+function wrapText(text, width) {
+  if (!width || width &lt; 1) return text;
+  return text.split(&#x27;\n&#x27;).map(line =&gt; {
+    const words = line.split(&#x27; &#x27;);
+    const out = [];
+    let cur = &#x27;&#x27;;
+    for (const w of words) {
+      if (!cur) cur = w;
+      else if ((cur + &#x27; &#x27; + w).length &lt;= width) cur += &#x27; &#x27; + w;
+      else { out.push(cur); cur = w; }
+    }
+    if (cur) out.push(cur);
+    return out.join(&#x27;\n&#x27;);
+  }).join(&#x27;\n&#x27;);
+}
+
+function buildCaptions(markers, opts) {
+  const nf = Math.round(opts.fps) || 24;
+  const colors = opts.colors;
+  const sel = markers.filter(m =&gt; !colors || colors.has(m.color));
+  let dropped = 0, empty = 0;
+  const items = [];
+  sel.forEach(m =&gt; {
+    const fr = tcToFrames(m.tc, nf) - (opts.offsetFrames || 0);
+    if (fr &lt; 0) { dropped++; return; }
+    if (!m.text) empty++;
+    const end = m.end ? tcToFrames(m.end, nf) - (opts.offsetFrames || 0) : null;
+    items.push({ frames: fr, sep: m.tc.charAt(8), text: m.text, colors: [m.color], end });
+  });
+  items.sort((a, b) =&gt; a.frames - b.frames);
+  const groups = [];
+  items.forEach(it =&gt; {
+    const last = groups[groups.length - 1];
+    if (last &amp;&amp; last.frames === it.frames) {
+      if (it.text) last.text = last.text ? last.text + &#x27;\n&#x27; + it.text : it.text;
+      if (!last.colors.includes(it.colors[0])) last.colors.push(it.colors[0]);
+      if (it.end != null &amp;&amp; (last.end == null || it.end &gt; last.end)) last.end = it.end;
+    } else groups.push({ frames: it.frames, sep: it.sep, text: it.text, colors: it.colors.slice(), end: it.end });
+  });
+  const fixed = Math.max(1, Math.round((opts.seconds || 3) * nf));
+  const cap = Math.max(1, Math.round((opts.capSeconds || 6) * nf));
+  const captions = groups.map((g, i) =&gt; {
+    const next = groups[i + 1];
+    let out;
+    if (opts.mode === &#x27;clip&#x27;) {
+      out = (g.end != null &amp;&amp; g.end &gt; g.frames) ? g.end : g.frames + fixed;
+      if (opts.trim &amp;&amp; next &amp;&amp; next.frames &lt; out) out = next.frames;
+    }
+    else if (opts.mode === &#x27;next&#x27;) out = next ? Math.min(next.frames, g.frames + cap) : g.frames + fixed;
+    else {
+      out = g.frames + fixed;
+      if (opts.trim &amp;&amp; next &amp;&amp; next.frames &lt; out) out = next.frames;
+    }
+    if (out &lt;= g.frames) out = g.frames + 1;
+    return {
+      inFrames: g.frames, outFrames: out,
+      tcIn: framesToTc(g.frames, nf, g.sep), tcOut: framesToTc(out, nf, g.sep),
+      text: wrapText(g.text, opts.wrap), colors: g.colors
+    };
+  });
+  return { captions, dropped, empty };
+}
+
+function buildSubcap(captions) {
+  const lines = [&#x27;@ This file written with the Avid Caption plugin, version 1&#x27;, &#x27;&#x27;, &#x27;&lt;begin subtitles&gt;&#x27;];
+  captions.forEach(c =&gt; {
+    lines.push(c.tcIn + &#x27; &#x27; + c.tcOut);
+    c.text.split(&#x27;\n&#x27;).forEach(t =&gt; lines.push(t));
+    lines.push(&#x27;&#x27;);
+  });
+  lines.push(&#x27;&lt;end subtitles&gt;&#x27;);
+  return lines.join(&#x27;\n&#x27;);
+}
+function subcapFileName(edlText) {
+  const m = String(edlText || &#x27;&#x27;).match(/^\s*TITLE:\s*(.+)$/m);
+  const marks = new RegExp(&#x27;[&#x27; + String.fromCharCode(0x300) + &#x27;-&#x27; + String.fromCharCode(0x36f) + &#x27;]&#x27;, &#x27;g&#x27;);
+  let base = m ? m[1].trim().normalize(&#x27;NFD&#x27;).replace(marks, &#x27;&#x27;).replace(/[^A-Za-z0-9._-]+/g, &#x27;_&#x27;).replace(/^_+|_+$/g, &#x27;&#x27;) : &#x27;&#x27;;
+  if (!base) base = &#x27;sequence&#x27;;
+  return base + &#x27;_subcap.txt&#x27;;
+}
+//#core-end
+
+/* ---------- UI ---------- */
+const $ = id =&gt; document.getElementById(id);
+const COLOR_HEX = { RED: &#x27;#e53935&#x27;, GREEN: &#x27;#2e9e4f&#x27;, BLUE: &#x27;#2f6fe0&#x27;, CYAN: &#x27;#12b5c9&#x27;, MAGENTA: &#x27;#c2379d&#x27;, YELLOW: &#x27;#e8b923&#x27;, BLACK: &#x27;#111111&#x27;, WHITE: &#x27;#ffffff&#x27; };
+const esc = s =&gt; String(s == null ? &#x27;&#x27; : s).replace(/[&amp;&lt;&gt;&quot;&#x27;]/g, c =&gt; ({ &#x27;&amp;&#x27;: &#x27;&amp;amp;&#x27;, &#x27;&lt;&#x27;: &#x27;&amp;lt;&#x27;, &#x27;&gt;&#x27;: &#x27;&amp;gt;&#x27;, &#x27;&quot;&#x27;: &#x27;&amp;quot;&#x27;, &quot;&#x27;&quot;: &#x27;&amp;#39;&#x27; }[c]));
+const colorOn = {};
+let seenColors = [];
+
+function dotHtml(c) { return &#x27;&lt;span class=&quot;dot&quot; style=&quot;background:&#x27; + (COLOR_HEX[c] || &#x27;transparent&#x27;) + &#x27;&quot;&gt;&lt;/span&gt;&#x27;; }
+
+function parseOffset(str, fps) {
+  const s = String(str || &#x27;&#x27;).trim();
+  if (!s) return { frames: 0, ok: true };
+  if (!/^\d{1,2}[:;]\d{2}[:;]\d{2}[:;]\d{2}$/.test(s)) return { frames: 0, ok: false };
+  return { frames: tcToFrames(s, fps), ok: true };
+}
+
+function renderColors(colors) {
+  seenColors = colors;
+  colors.forEach(c =&gt; { if (!(c in colorOn)) colorOn[c] = true; });
+  $(&#x27;colors&#x27;).innerHTML = colors.length ? colors.map(c =&gt;
+    &#x27;&lt;label class=&quot;check&quot;&gt;&lt;input type=&quot;checkbox&quot; data-c=&quot;&#x27; + esc(c) + &#x27;&quot;&#x27; + (colorOn[c] ? &#x27; checked&#x27; : &#x27;&#x27;) + &#x27;&gt;&#x27; + dotHtml(c) + esc(c.toLowerCase()) + &#x27;&lt;/label&gt;&#x27;
+  ).join(&#x27;&#x27;) : &#x27;&lt;span class=&quot;dim&quot;&gt;Aucun marker détecté&lt;/span&gt;&#x27;;
+}
+
+function fmtDur(frames, fps) {
+  const nf = Math.round(fps) || 24;
+  const s = Math.floor(frames / nf), f = frames % nf;
+  return (s ? s + &#x27; s &#x27; : &#x27;&#x27;) + f + &#x27; f&#x27;;
+}
+
+function run() {
+  const fps = parseFloat($(&#x27;fps&#x27;).value) || 24;
+  const mode = $(&#x27;mode&#x27;).value;
+  $(&#x27;secLabel&#x27;).textContent = mode === &#x27;next&#x27; ? &#x27;Durée du dernier (s)&#x27; : mode === &#x27;clip&#x27; ? &#x27;Durée si clip inconnu (s)&#x27; : &#x27;Durée (s)&#x27;;
+  $(&#x27;capField&#x27;).hidden = mode !== &#x27;next&#x27;;
+  $(&#x27;trimField&#x27;).hidden = mode === &#x27;next&#x27;;
+
+  const text = $(&#x27;edlText&#x27;).value;
+  const parsed = parseEdlMarkers(text);
+  const found = [];
+  parsed.markers.forEach(m =&gt; { if (!found.includes(m.color)) found.push(m.color); });
+  if (found.join() !== seenColors.join()) renderColors(found);
+
+  const info = $(&#x27;edlInfo&#x27;);
+  if (!text.trim()) { info.textContent = &#x27;&#x27;; info.className = &#x27;info&#x27;; }
+  else if (!parsed.markers.length) {
+    info.textContent = &#x27;Aucun marker trouvé. L\&#x27;EDL doit contenir des lignes du type « * LOC: 01:00:04:12 RED commentaire ».&#x27;;
+    info.className = &#x27;info warn&#x27;;
+  } else {
+    info.textContent = parsed.markers.length + &#x27; marker&#x27; + (parsed.markers.length &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; · &#x27; + parsed.events + &#x27; événement&#x27; + (parsed.events &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;);
+    info.className = &#x27;info&#x27;;
+  }
+
+  const off = parseOffset($(&#x27;offset&#x27;).value, fps);
+  const colors = new Set(found.filter(c =&gt; colorOn[c]));
+  const res = buildCaptions(parsed.markers, {
+    fps, colors, mode,
+    seconds: parseFloat($(&#x27;seconds&#x27;).value) || 3,
+    capSeconds: parseFloat($(&#x27;cap&#x27;).value) || 6,
+    trim: $(&#x27;trim&#x27;).checked,
+    offsetFrames: off.ok ? off.frames : 0,
+    wrap: parseInt($(&#x27;wrap&#x27;).value, 10) || 0
+  });
+  const notes = [];
+  if (!off.ok) notes.push(&#x27;Décalage invalide (format HH:MM:SS:FF), ignoré.&#x27;);
+  if (res.dropped) notes.push(res.dropped + &#x27; marker&#x27; + (res.dropped &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; avant le décalage, ignoré&#x27; + (res.dropped &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27;.&#x27;);
+  if (res.empty) notes.push(res.empty + &#x27; marker&#x27; + (res.empty &gt; 1 ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; sans commentaire.&#x27;);
+  if (notes.length) { info.textContent += (info.textContent ? &#x27; · &#x27; : &#x27;&#x27;) + notes.join(&#x27; &#x27;); info.className = &#x27;info warn&#x27;; }
+
+  const box = $(&#x27;results&#x27;);
+  if (!res.captions.length) {
+    box.innerHTML = &#x27;&lt;div class=&quot;empty&quot;&gt;&#x27; + (parsed.markers.length ? &#x27;Aucun sous-titre avec ces réglages. Vérifie les couleurs cochées.&#x27; : &#x27;Colle ou charge un EDL pour voir les sous-titres ici.&#x27;) + &#x27;&lt;/div&gt;&#x27;;
+    $(&#x27;outText&#x27;).value = &#x27;&#x27;;
+    return;
+  }
+  box.innerHTML = &#x27;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Entrée&lt;/th&gt;&lt;th&gt;Sortie&lt;/th&gt;&lt;th&gt;Durée&lt;/th&gt;&lt;th&gt;Couleur&lt;/th&gt;&lt;th&gt;Texte&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&#x27; +
+    res.captions.map(c =&gt;
+      &#x27;&lt;tr&gt;&lt;td class=&quot;tc&quot;&gt;&#x27; + esc(c.tcIn) + &#x27;&lt;/td&gt;&lt;td class=&quot;tc&quot;&gt;&#x27; + esc(c.tcOut) + &#x27;&lt;/td&gt;&lt;td class=&quot;tc&quot;&gt;&#x27; + esc(fmtDur(c.outFrames - c.inFrames, fps)) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td&gt;&#x27; + c.colors.map(x =&gt; dotHtml(x) + &#x27; &#x27; + esc(x.toLowerCase())).join(&#x27;&lt;br&gt;&#x27;) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td&gt;&#x27; + (esc(c.text).replace(/\n/g, &#x27;&lt;br&gt;&#x27;) || &#x27;&lt;span class=&quot;dim&quot;&gt;-&lt;/span&gt;&#x27;) + &#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;
+    ).join(&#x27;&#x27;) + &#x27;&lt;/tbody&gt;&lt;/table&gt;&#x27;;
+  $(&#x27;outText&#x27;).value = buildSubcap(res.captions);
+}
+
+let timer = null;
+const later = () =&gt; { clearTimeout(timer); timer = setTimeout(run, 150); };
+
+function readFile(file) {
+  const rd = new FileReader();
+  rd.onload = () =&gt; {
+    const txt = String(rd.result || &#x27;&#x27;);
+    if (txt.indexOf(String.fromCharCode(65533)) &gt;= 0) {
+      const rd2 = new FileReader();
+      rd2.onload = () =&gt; { $(&#x27;edlText&#x27;).value = String(rd2.result || &#x27;&#x27;); run(); };
+      rd2.readAsText(file, &#x27;windows-1252&#x27;);
+      return;
+    }
+    $(&#x27;edlText&#x27;).value = txt; run();
+  };
+  rd.readAsText(file, &#x27;utf-8&#x27;);
+}
+$(&#x27;edlFile&#x27;).addEventListener(&#x27;change&#x27;, e =&gt; { const f = e.target.files &amp;&amp; e.target.files[0]; if (f) readFile(f); e.target.value = &#x27;&#x27;; });
+$(&#x27;edlText&#x27;).addEventListener(&#x27;dragover&#x27;, e =&gt; e.preventDefault());
+$(&#x27;edlText&#x27;).addEventListener(&#x27;drop&#x27;, e =&gt; {
+  const f = e.dataTransfer &amp;&amp; e.dataTransfer.files &amp;&amp; e.dataTransfer.files[0];
+  if (f) { e.preventDefault(); readFile(f); }
+});
+$(&#x27;edlText&#x27;).addEventListener(&#x27;input&#x27;, later);
+[&#x27;fps&#x27;, &#x27;mode&#x27;, &#x27;seconds&#x27;, &#x27;cap&#x27;, &#x27;trim&#x27;, &#x27;offset&#x27;, &#x27;wrap&#x27;].forEach(id =&gt; { $(id).addEventListener(&#x27;input&#x27;, later); $(id).addEventListener(&#x27;change&#x27;, later); });
+$(&#x27;colors&#x27;).addEventListener(&#x27;change&#x27;, e =&gt; {
+  const c = e.target &amp;&amp; e.target.dataset &amp;&amp; e.target.dataset.c;
+  if (c) { colorOn[c] = e.target.checked; run(); }
+});
+$(&#x27;clearBtn&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; { $(&#x27;edlText&#x27;).value = &#x27;&#x27;; run(); });
+// Inside the Claude viewer the file goes through the downloads capability (the viewer confirms the save).
+// Opened on its own as a .html file, the browser downloads it directly.
+async function getDownloads() {
+  try { if (window.claude &amp;&amp; window.claude.use) return await window.claude.use(&#x27;downloads&#x27;); } catch (e) { /* fall through */ }
+  return null;
+}
+
+function downloadText(name, text) {
+  const blob = new Blob([text], { type: &#x27;text/plain;charset=utf-8&#x27; });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement(&#x27;a&#x27;);
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() =&gt; URL.revokeObjectURL(url), 1500);
+}
+$(&#x27;dlBtn&#x27;).addEventListener(&#x27;click&#x27;, async () =&gt; {
+  const msg = $(&#x27;outMsg&#x27;);
+  const text = $(&#x27;outText&#x27;).value;
+  if (!text) { msg.textContent = &#x27;Rien à télécharger : aucun sous-titre généré.&#x27;; return; }
+  const name = subcapFileName($(&#x27;edlText&#x27;).value);
+  const dl = await getDownloads();
+  if (dl) {
+    try {
+      await dl.save({ filename: name, data: text });
+      msg.textContent = name + &#x27; enregistré.&#x27;;
+    } catch (e) {
+      const code = e &amp;&amp; e.code;
+      if (code === &#x27;declined&#x27;) msg.textContent = &#x27;Téléchargement annulé.&#x27;;
+      else if (code === &#x27;rate_limited&#x27;) msg.textContent = &#x27;Une demande est déjà en cours. Réessaie dans un instant.&#x27;;
+      else {
+        $(&#x27;preview&#x27;).open = true;
+        msg.textContent = &#x27;Le téléchargement n\&#x27;est pas disponible dans cette vue : copie le texte ci-dessous.&#x27;;
+      }
+    }
+    return;
+  }
+  downloadText(name, text);
+  msg.textContent = &#x27;Téléchargement lancé : &#x27; + name + &#x27; (dossier Téléchargements de ton navigateur).&#x27;;
+});
+
+$(&#x27;copyBtn&#x27;).addEventListener(&#x27;click&#x27;, async () =&gt; {
+  const ta = $(&#x27;outText&#x27;);
+  const text = ta.value;
+  if (!text) { $(&#x27;outMsg&#x27;).textContent = &#x27;Rien à copier : aucun sous-titre généré.&#x27;; return; }
+  $(&#x27;preview&#x27;).open = true;
+  ta.focus(); ta.select();
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = false; }
+  $(&#x27;outMsg&#x27;).textContent = ok ? &#x27;SubCap copié. Colle-le dans un fichier .txt (éditeur de texte brut).&#x27; : &#x27;Le texte est sélectionné : copie-le avec Ctrl ou Cmd + C, puis colle-le dans un fichier .txt.&#x27;;
+});
+
+run();
+&lt;/script&gt;
+
+&lt;/body&gt;&lt;/html&gt;"></iframe></section>
+<section class="panel" id="p-cs" role="tabpanel" aria-labelledby="t-cs"><iframe title="Codec Size" allow="clipboard-write" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;title&gt;Codec Size&lt;/title&gt;&lt;meta charset=utf8&gt;&lt;meta name=viewport content=&quot;width=device-width,initial-scale=1,viewport-fit=cover&quot;&gt;&lt;style&gt;:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}&lt;/style&gt;&lt;style&gt;textarea::placeholder{white-space:pre-wrap;overflow-wrap:anywhere}textarea{min-height:110px !important}.wrap{grid-template-columns:minmax(0,1fr)}.wrap&gt;*{min-width:0}th,td{padding-left:8px !important;padding-right:8px !important}td.comment{min-width:200px !important}td.clip{max-width:140px !important}th{letter-spacing:.03em !important}td.tc,td.id{font-size:12.5px !important}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+
+&lt;meta name=&quot;claude:viewport-fit-sides&quot; content=&quot;cover&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Barlow+Condensed:wght@600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap&quot;&gt;
+&lt;style&gt;
+/* Layout concept: a storage estimate sheet. Duration and format on top, then one ruled table
+   where every codec row carries its rate and a bar scaled to the largest file. */
+:root {
+  --font-display: &quot;Barlow Condensed&quot;, &quot;Arial Narrow&quot;, &quot;Helvetica Neue&quot;, sans-serif;
+  --font-body: &quot;Barlow&quot;, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif;
+  --font-mono: &quot;IBM Plex Mono&quot;, ui-monospace, Menlo, Consolas, monospace;
+
+  --bg: #eef1f5;
+  --surface: #ffffff;
+  --surface-2: #e5e9ef;
+  --ink: #141922;
+  --muted: #566275;
+  --line: #cfd6e0;
+  --accent: #2447d6;
+  --on-accent: #ffffff;
+  --dnx: #2447d6;
+  --prores: #b3541a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme=&quot;light&quot;]) {
+    --bg: #10141a; --surface: #171d25; --surface-2: #212934; --ink: #e7ebf1; --muted: #98a3b4; --line: #2b3441;
+    --accent: #86a1ff; --on-accent: #0a1020; --dnx: #86a1ff; --prores: #f0a56a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme=&quot;dark&quot;] {
+  --bg: #10141a; --surface: #171d25; --surface-2: #212934; --ink: #e7ebf1; --muted: #98a3b4; --line: #2b3441;
+  --accent: #86a1ff; --on-accent: #0a1020; --dnx: #86a1ff; --prores: #f0a56a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--font-body);
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 22px; }
+h1, h2 { font-family: var(--font-display); font-weight: 700; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; }
+h2 { font-size: 1.25rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.kicker { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.lede { max-width: 64ch; color: var(--muted); margin: 12px 0 0; }
+
+.options { display: flex; flex-wrap: wrap; gap: 16px 20px; align-items: end; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field &gt; label, .field .lab { font: 500 11px/1 var(--font-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.dur { display: grid; gap: 7px; }
+.tc { display: flex; align-items: flex-start; gap: 4px; }
+.tc .unit { display: grid; gap: 5px; justify-items: center; }
+.tc .unit label { font: 400 11px/1 var(--font-mono); color: var(--muted); }
+.tc input { width: 3.1rem; text-align: center; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 7px 2px; font: 500 22px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
+.tc .sep { font: 500 22px/1.2 var(--font-mono); color: var(--muted); padding-top: 7px; }
+.hint { font: 400 11px/1.3 var(--font-mono); color: var(--muted); max-width: 34ch; }
+select, input[type=&quot;number&quot;] { background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; font: 400 14px/1.2 var(--font-mono); min-width: 0; }
+input[type=&quot;number&quot;] { width: 72px; font-variant-numeric: tabular-nums; }
+select:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.readout { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; font: 500 13px/1.4 var(--font-mono); color: var(--muted); }
+.readout strong { color: var(--ink); font-weight: 500; }
+
+.tablewrap { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 760px; }
+th { text-align: left; font: 500 11px/1 var(--font-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding: 11px 12px; box-shadow: inset 0 -2px 0 var(--ink); background: var(--surface); white-space: nowrap; }
+th.num, td.num { text-align: right; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+td.num { font: 400 13px/1.4 var(--font-mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.name { font-weight: 600; white-space: nowrap; }
+td.name small { display: block; font: 400 11px/1.3 var(--font-mono); color: var(--muted); letter-spacing: 0.02em; }
+tr.group td { background: var(--surface-2); font: 500 11px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 9px 12px; }
+td.total { width: 34%; min-width: 220px; }
+.size { font: 500 15px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
+.withaudio { font: 400 11px/1.3 var(--font-mono); color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.withaudio b { color: var(--ink); font-weight: 500; }
+.bar { height: 6px; border-radius: 3px; background: var(--surface-2); margin-top: 6px; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 3px; background: var(--c); }
+tr[data-f=&quot;dnx&quot;] { --c: var(--dnx); }
+tr[data-f=&quot;prores&quot;] { --c: var(--prores); }
+tr[data-f=&quot;dnx&quot;] .size { color: var(--dnx); }
+tr[data-f=&quot;prores&quot;] .size { color: var(--prores); }
+
+.results-sec { display: grid; gap: 14px; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tab { border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: none; color: var(--muted); font: 600 14px/1 var(--font-body); letter-spacing: 0.03em; padding: 12px 14px 10px; margin-bottom: -1px; }
+.tab:hover { background: none; color: var(--ink); }
+.tab[aria-selected=&quot;true&quot;] { color: var(--ink); border-bottom-color: var(--dnx); }
+.tab[data-t=&quot;prores&quot;][aria-selected=&quot;true&quot;] { border-bottom-color: var(--prores); }
+.alias { font: 400 11px/1 var(--font-mono); font-weight: 400; color: var(--muted); letter-spacing: 0.02em; margin-left: 6px; }
+.foot { color: var(--muted); font-size: 13px; max-width: 80ch; display: grid; gap: 8px; }
+.foot p { margin: 0; }
+@media (prefers-reduced-motion: no-preference) { .bar i { transition: width 0.2s; } }
+&lt;/style&gt;
+
+&lt;main class=&quot;wrap&quot;&gt;
+  &lt;header&gt;
+    &lt;p class=&quot;kicker&quot;&gt;Assistant monteur · Avid Media Composer&lt;/p&gt;
+    &lt;h1&gt;Codec Size&lt;/h1&gt;
+    &lt;p class=&quot;lede&quot;&gt;Entre la durée du film, la cadence et le format d&#x27;image. L&#x27;outil donne la taille des médias en DNx (LB, SQ, HQ, HQX, 444) et en ProRes.&lt;/p&gt;
+  &lt;/header&gt;
+
+  &lt;section class=&quot;options&quot; aria-label=&quot;Réglages&quot;&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;span class=&quot;lab&quot; id=&quot;durLab&quot;&gt;Durée du film&lt;/span&gt;
+      &lt;div class=&quot;dur&quot; role=&quot;group&quot; aria-labelledby=&quot;durLab&quot;&gt;
+        &lt;div class=&quot;tc&quot;&gt;
+          &lt;div class=&quot;unit&quot;&gt;&lt;input type=&quot;text&quot; id=&quot;dh&quot; value=&quot;1&quot; maxlength=&quot;2&quot; inputmode=&quot;numeric&quot; autocomplete=&quot;off&quot;&gt;&lt;label for=&quot;dh&quot;&gt;heures&lt;/label&gt;&lt;/div&gt;
+          &lt;span class=&quot;sep&quot; aria-hidden=&quot;true&quot;&gt;:&lt;/span&gt;
+          &lt;div class=&quot;unit&quot;&gt;&lt;input type=&quot;text&quot; id=&quot;dm&quot; value=&quot;30&quot; maxlength=&quot;2&quot; inputmode=&quot;numeric&quot; autocomplete=&quot;off&quot;&gt;&lt;label for=&quot;dm&quot;&gt;min&lt;/label&gt;&lt;/div&gt;
+          &lt;span class=&quot;sep&quot; aria-hidden=&quot;true&quot;&gt;:&lt;/span&gt;
+          &lt;div class=&quot;unit&quot;&gt;&lt;input type=&quot;text&quot; id=&quot;ds&quot; value=&quot;00&quot; maxlength=&quot;2&quot; inputmode=&quot;numeric&quot; autocomplete=&quot;off&quot;&gt;&lt;label for=&quot;ds&quot;&gt;sec&lt;/label&gt;&lt;/div&gt;
+          &lt;span class=&quot;sep&quot; aria-hidden=&quot;true&quot;&gt;:&lt;/span&gt;
+          &lt;div class=&quot;unit&quot;&gt;&lt;input type=&quot;text&quot; id=&quot;df&quot; value=&quot;00&quot; maxlength=&quot;2&quot; inputmode=&quot;numeric&quot; autocomplete=&quot;off&quot;&gt;&lt;label for=&quot;df&quot;&gt;images&lt;/label&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;span class=&quot;hint&quot;&gt;Tape les chiffres, le curseur passe seul à la case suivante. Flèches haut et bas pour ajuster.&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;fps&quot;&gt;Cadence&lt;/label&gt;
+      &lt;select id=&quot;fps&quot;&gt;
+        &lt;option value=&quot;23.976&quot;&gt;23.976&lt;/option&gt;
+        &lt;option value=&quot;24&quot; selected&gt;24&lt;/option&gt;
+        &lt;option value=&quot;25&quot;&gt;25&lt;/option&gt;
+        &lt;option value=&quot;29.97&quot;&gt;29.97&lt;/option&gt;
+        &lt;option value=&quot;30&quot;&gt;30&lt;/option&gt;
+        &lt;option value=&quot;50&quot;&gt;50&lt;/option&gt;
+        &lt;option value=&quot;59.94&quot;&gt;59.94&lt;/option&gt;
+        &lt;option value=&quot;60&quot;&gt;60&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;size&quot;&gt;Format d&#x27;image&lt;/label&gt;
+      &lt;select id=&quot;size&quot;&gt;
+        &lt;option value=&quot;HD&quot; selected&gt;HD 1920 × 1080&lt;/option&gt;
+        &lt;option value=&quot;2K&quot;&gt;2K 2048 × 1080&lt;/option&gt;
+        &lt;option value=&quot;UHD&quot;&gt;UHD 3840 × 2160&lt;/option&gt;
+        &lt;option value=&quot;4K&quot;&gt;4K DCI 4096 × 2160&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;units&quot;&gt;Unités&lt;/label&gt;
+      &lt;select id=&quot;units&quot;&gt;
+        &lt;option value=&quot;dec&quot; selected&gt;Go, To (1 Go = 1000 Mo)&lt;/option&gt;
+        &lt;option value=&quot;mo&quot;&gt;Mo (mégaoctets)&lt;/option&gt;
+        &lt;option value=&quot;bin&quot;&gt;Gio, Tio (1 Gio = 1024 Mio)&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;field&quot;&gt;
+      &lt;label for=&quot;audio&quot;&gt;Son PCM stéréo&lt;/label&gt;
+      &lt;select id=&quot;audio&quot;&gt;
+        &lt;option value=&quot;24-48&quot; selected&gt;24 bits, 48 kHz&lt;/option&gt;
+        &lt;option value=&quot;16-48&quot;&gt;16 bits, 48 kHz&lt;/option&gt;
+        &lt;option value=&quot;24-96&quot;&gt;24 bits, 96 kHz&lt;/option&gt;
+        &lt;option value=&quot;none&quot;&gt;Sans son&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;p class=&quot;readout&quot; id=&quot;readout&quot; role=&quot;status&quot;&gt;&lt;/p&gt;
+
+  &lt;section class=&quot;results-sec&quot; aria-label=&quot;Tailles par codec&quot;&gt;
+    &lt;div class=&quot;tabs&quot; role=&quot;tablist&quot; aria-label=&quot;Famille de codecs&quot;&gt;
+      &lt;button type=&quot;button&quot; class=&quot;tab&quot; role=&quot;tab&quot; id=&quot;tab-dnx&quot; data-t=&quot;dnx&quot; aria-selected=&quot;true&quot;&gt;Avid DNx&lt;/button&gt;
+      &lt;button type=&quot;button&quot; class=&quot;tab&quot; role=&quot;tab&quot; id=&quot;tab-prores&quot; data-t=&quot;prores&quot; aria-selected=&quot;false&quot;&gt;Apple ProRes&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;tablewrap&quot; id=&quot;results&quot; role=&quot;tabpanel&quot;&gt;&lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;div class=&quot;foot&quot;&gt;
+    &lt;p&gt;Débits publiés par Avid pour DNx et valeurs cibles du livre blanc Apple ProRes (4444 sans canal alpha). Le débit varie proportionnellement à la cadence. Le ProRes est à débit variable : la taille réelle d&#x27;un fichier peut s&#x27;écarter de la valeur cible selon l&#x27;image. Le ProRes 2K est calculé à partir des valeurs 4K. L&#x27;ancien nom DNxHD (en gris) est une équivalence : son chiffre était le débit nominal en Mbit/s, légèrement supérieur à celui du profil DNx actuel (par exemple 36 pour 34,5 Mbit/s en LB).&lt;/p&gt;
+    &lt;p&gt;Le son est du PCM non compressé sur deux pistes mono : 288 ko/s en 24 bits à 48 kHz. Les métadonnées et le conteneur (MXF, MOV) ne sont pas comptés. Rien n&#x27;est envoyé : tout se passe dans ton navigateur.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/main&gt;
+
+&lt;script&gt;
+//#core-start
+// DNx : débits Avid en Mo/s, colonnes 23.976 / 25 / 29.97 / 50 / 59.94 images par seconde.
+const DNX_COLS = [23.976, 25, 29.97, 50, 59.94];
+const DNX = {
+  HD:  { &#x27;444&#x27;: [41.68, 43.46, 52.10, 86.91, 104.19], HQX: [20.79, 21.68, 25.99, 43.36, 51.98], HQ: [20.79, 21.68, 25.99, 43.36, 51.98], SQ: [13.77, 14.36, 17.21, 28.71, 34.42], LB: [4.31, 4.49, 5.39, 8.98, 10.77] },
+  &#x27;2K&#x27;:{ &#x27;444&#x27;: [44.39, 46.29, 55.49, 92.58, 110.98], HQX: [22.20, 23.14, 27.75, 46.29, 55.49], HQ: [22.20, 23.14, 27.75, 46.29, 55.49], SQ: [14.70, 15.33, 18.38, 30.66, 36.76], LB: [4.59, 4.79, 5.74, 9.57, 11.47] },
+  UHD: { &#x27;444&#x27;: [166.61, 173.73, 208.27, 347.46, 416.54], HQX: [83.26, 86.82, 104.08, 173.63, 208.15], HQ: [83.26, 86.82, 104.08, 173.63, 208.15], SQ: [55.07, 57.42, 68.84, 114.84, 137.67], LB: [17.14, 17.87, 21.42, 35.74, 42.85] },
+  &#x27;4K&#x27;:{ &#x27;444&#x27;: [177.67, 185.25, 222.08, 370.51, 444.16], HQX: [88.88, 92.68, 111.10, 185.35, 222.20], HQ: [88.88, 92.68, 111.10, 185.35, 222.20], SQ: [58.72, 61.23, 73.40, 122.46, 146.81], LB: [18.26, 19.04, 22.83, 38.09, 45.66] }
+};
+const DNX_LIST = [
+  { id: &#x27;LB&#x27;, label: &#x27;DNx LB&#x27;, note: &#x27;Low Bandwidth, 8 bits 4:2:2&#x27; },
+  { id: &#x27;SQ&#x27;, label: &#x27;DNx SQ&#x27;, note: &#x27;Standard Quality, 8 bits 4:2:2&#x27; },
+  { id: &#x27;HQ&#x27;, label: &#x27;DNx HQ&#x27;, note: &#x27;High Quality, 8 bits 4:2:2&#x27; },
+  { id: &#x27;HQX&#x27;, label: &#x27;DNx HQX&#x27;, note: &#x27;High Quality, 10 bits 4:2:2&#x27; },
+  { id: &#x27;444&#x27;, label: &#x27;DNx 444&#x27;, note: &#x27;10 bits 4:4:4&#x27; }
+];
+
+// ProRes : débits cibles Apple en Mbit/s, lignes 24 / 25 / 30 / 50 / 60 images par seconde.
+const PR_COLS = [24, 25, 30, 50, 60];
+const PR = {
+  HD:  { Proxy: [36, 38, 45, 76, 91], LT: [82, 85, 102, 170, 204], &#x27;422&#x27;: [117, 122, 147, 245, 293], HQ: [176, 184, 220, 367, 440], &#x27;4444&#x27;: [264, 275, 330, 551, 660], XQ: [396, 413, 495, 826, 990] },
+  UHD: { Proxy: [145, 151, 182, 303, 363], LT: [328, 342, 410, 684, 821], &#x27;422&#x27;: [471, 492, 589, 983, 1178], HQ: [707, 737, 884, 1475, 1768], &#x27;4444&#x27;: [1061, 1106, 1326, 2212, 2652], XQ: [1591, 1659, 1989, 3318, 3977] },
+  &#x27;4K&#x27;:{ Proxy: [155, 162, 194, 323, 388], LT: [350, 365, 437, 730, 875], &#x27;422&#x27;: [503, 524, 629, 1049, 1257], HQ: [754, 786, 943, 1573, 1886], &#x27;4444&#x27;: [1131, 1180, 1414, 2359, 2828], XQ: [1697, 1769, 2121, 3539, 4242] }
+};
+const PR_LIST = [
+  { id: &#x27;Proxy&#x27;, label: &#x27;ProRes 422 Proxy&#x27;, note: &#x27;10 bits 4:2:2&#x27; },
+  { id: &#x27;LT&#x27;, label: &#x27;ProRes 422 LT&#x27;, note: &#x27;10 bits 4:2:2&#x27; },
+  { id: &#x27;422&#x27;, label: &#x27;ProRes 422&#x27;, note: &#x27;10 bits 4:2:2&#x27; },
+  { id: &#x27;HQ&#x27;, label: &#x27;ProRes 422 HQ&#x27;, note: &#x27;10 bits 4:2:2&#x27; },
+  { id: &#x27;4444&#x27;, label: &#x27;ProRes 4444&#x27;, note: &#x27;12 bits 4:4:4, sans alpha&#x27; },
+  { id: &#x27;XQ&#x27;, label: &#x27;ProRes 4444 XQ&#x27;, note: &#x27;12 bits 4:4:4, sans alpha&#x27; }
+];
+
+// Anciens noms DNxHD (le nombre était le débit en Mbit/s), pour 1080 : colonnes 23.976-24 / 25 / 29.97-30 / 50 / 59.94-60.
+const DNX_LEGACY = {
+  LB: [&#x27;36&#x27;, &#x27;36&#x27;, &#x27;45&#x27;, &#x27;75&#x27;, &#x27;90&#x27;],
+  SQ: [&#x27;115&#x27;, &#x27;120&#x27;, &#x27;145&#x27;, &#x27;240&#x27;, &#x27;290&#x27;],
+  HQ: [&#x27;175&#x27;, &#x27;185&#x27;, &#x27;220&#x27;, &#x27;365&#x27;, &#x27;440&#x27;],
+  HQX: [&#x27;175x&#x27;, &#x27;185x&#x27;, &#x27;220x&#x27;, &#x27;365x&#x27;, &#x27;440x&#x27;],
+  &#x27;444&#x27;: [&#x27;350x&#x27;, &#x27;365x&#x27;, &#x27;440x&#x27;, null, null]
+};
+function legacyName(size, id, fps) {
+  if (size === &#x27;HD&#x27;) {
+    const n = DNX_LEGACY[id][nearestCol(DNX_COLS, fps)];
+    if (n) return &#x27;ex-DNxHD &#x27; + n;
+  }
+  return &#x27;ex-DNxHR &#x27; + id;
+}
+
+// Colonne de référence la plus proche de la cadence choisie.
+function nearestCol(cols, fps) {
+  let best = 0;
+  cols.forEach((c, i) =&gt; { if (Math.abs(c - fps) &lt; Math.abs(cols[best] - fps)) best = i; });
+  return best;
+}
+
+// Débit en octets par seconde.
+function dnxBytesPerSec(size, id, fps) {
+  const i = nearestCol(DNX_COLS, fps);
+  return DNX[size][id][i] * 1e6 * fps / DNX_COLS[i];
+}
+function proresBytesPerSec(size, id, fps) {
+  const i = nearestCol(PR_COLS, fps);
+  const mbps = size === &#x27;2K&#x27; ? PR[&#x27;4K&#x27;][id][i] / 4 : PR[size][id][i];
+  return mbps * 1e6 / 8 * fps / PR_COLS[i];
+}
+
+function durationSeconds(h, m, s, f, fps) {
+  return Math.max(0, h) * 3600 + Math.max(0, m) * 60 + Math.max(0, s) + Math.max(0, f) / fps;
+}
+
+function buildRows(size, fps, seconds) {
+  const rows = [];
+  DNX_LIST.forEach(c =&gt; {
+    const bps = dnxBytesPerSec(size, c.id, fps);
+    rows.push({ fam: &#x27;dnx&#x27;, label: c.label, alias: legacyName(size, c.id, fps), note: c.note, bps, total: bps * seconds });
+  });
+  PR_LIST.forEach(c =&gt; {
+    const bps = proresBytesPerSec(size, c.id, fps);
+    rows.push({ fam: &#x27;prores&#x27;, label: c.label, note: c.note, bps, total: bps * seconds });
+  });
+  return rows;
+}
+
+function fmtBytes(bytes, mode) {
+  if (mode === &#x27;mo&#x27;) {
+    const mo = bytes / 1e6;
+    const dm = mo &gt;= 100 ? 0 : 1;
+    return mo.toLocaleString(&#x27;fr-FR&#x27;, { minimumFractionDigits: dm, maximumFractionDigits: dm }) + &#x27; Mo&#x27;;
+  }
+  const binary = mode === &#x27;bin&#x27;;
+  const base = binary ? 1024 : 1000;
+  const names = binary ? [&#x27;o&#x27;, &#x27;Kio&#x27;, &#x27;Mio&#x27;, &#x27;Gio&#x27;, &#x27;Tio&#x27;] : [&#x27;o&#x27;, &#x27;Ko&#x27;, &#x27;Mo&#x27;, &#x27;Go&#x27;, &#x27;To&#x27;];
+  let v = bytes, i = 0;
+  while (v &gt;= base &amp;&amp; i &lt; 4) { v /= base; i++; }
+  if (i &lt; 2) { i = 2; v = bytes / Math.pow(base, 2); }
+  const d = v &gt;= 100 ? 0 : v &gt;= 10 ? 1 : 2;
+  return v.toLocaleString(&#x27;fr-FR&#x27;, { minimumFractionDigits: d, maximumFractionDigits: d }) + &#x27; &#x27; + names[i];
+}
+//#core-end
+
+/* ---------- UI ---------- */
+const $ = id =&gt; document.getElementById(id);
+const nf = (v, d) =&gt; v.toLocaleString(&#x27;fr-FR&#x27;, { minimumFractionDigits: d, maximumFractionDigits: d });
+
+function run() {
+  const fps = parseFloat($(&#x27;fps&#x27;).value) || 24;
+  const size = $(&#x27;size&#x27;).value;
+  const mode = $(&#x27;units&#x27;).value;
+  const aud = $(&#x27;audio&#x27;).value;
+  const ap = aud === &#x27;none&#x27; ? [0, 0] : aud.split(&#x27;-&#x27;).map(Number);
+  const abits = ap[0], arate = ap[1];
+  const audioBps = abits ? arate * 1000 * abits / 8 * 2 : 0; // 2 pistes mono
+  const h = parseInt($(&#x27;dh&#x27;).value, 10) || 0, m = Math.min(59, parseInt($(&#x27;dm&#x27;).value, 10) || 0);
+  const s = Math.min(59, parseInt($(&#x27;ds&#x27;).value, 10) || 0), f = Math.min(Math.max(0, Math.round(fps) - 1), parseInt($(&#x27;df&#x27;).value, 10) || 0);
+  const seconds = durationSeconds(h, m, s, f, fps);
+  const frames = Math.round(seconds * fps);
+
+  const hh = Math.floor(seconds / 3600), mm = Math.floor(seconds % 3600 / 60), ss = Math.floor(seconds % 60);
+  $(&#x27;readout&#x27;).innerHTML = &#x27;&lt;span&gt;Durée &lt;strong&gt;&#x27; + hh + &#x27; h &#x27; + String(mm).padStart(2, &#x27;0&#x27;) + &#x27; min &#x27; + String(ss).padStart(2, &#x27;0&#x27;) + &#x27; s&lt;/strong&gt;&lt;/span&gt;&#x27; +
+    &#x27;&lt;span&gt;&lt;strong&gt;&#x27; + frames.toLocaleString(&#x27;fr-FR&#x27;) + &#x27;&lt;/strong&gt; images à &#x27; + $(&#x27;fps&#x27;).value + &#x27; i/s&lt;/span&gt;&#x27; +
+    (audioBps ? &#x27;&lt;span&gt;Son PCM stéréo &lt;strong&gt;&#x27; + abits + &#x27; bits &#x27; + arate + &#x27; kHz&lt;/strong&gt; : &#x27; + fmtBytes(audioBps * seconds, mode) + &#x27; (&#x27; + fmtBytes(audioBps * 3600, mode) + &#x27; par heure)&lt;/span&gt;&#x27; : &#x27;&#x27;);
+
+  if (!seconds) {
+    $(&#x27;results&#x27;).innerHTML = &#x27;&lt;div style=&quot;padding:28px 16px;color:var(--muted);text-align:center&quot;&gt;Entre une durée supérieure à zéro pour voir les tailles.&lt;/div&gt;&#x27;;
+    return;
+  }
+  const rows = buildRows(size, fps, seconds).filter(r =&gt; r.fam === tab);
+  const max = Math.max.apply(null, rows.map(r =&gt; r.total));
+  let html = &#x27;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Codec&lt;/th&gt;&lt;th class=&quot;num&quot;&gt;Débit&lt;/th&gt;&lt;th class=&quot;num&quot;&gt;Mo/s&lt;/th&gt;&lt;th class=&quot;num&quot;&gt;Par heure&lt;/th&gt;&lt;th&gt;Taille totale&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&#x27;;
+  rows.forEach(r =&gt; {
+    html += &#x27;&lt;tr data-f=&quot;&#x27; + r.fam + &#x27;&quot;&gt;&lt;td class=&quot;name&quot;&gt;&#x27; + r.label + (r.alias ? &#x27;&lt;span class=&quot;alias&quot;&gt;&#x27; + r.alias + &#x27;&lt;/span&gt;&#x27; : &#x27;&#x27;) + &#x27;&lt;small&gt;&#x27; + r.note + &#x27;&lt;/small&gt;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;num&quot;&gt;&#x27; + nf(r.bps * 8 / 1e6, r.bps * 8 / 1e6 &gt;= 100 ? 0 : 1) + &#x27; Mbit/s&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;num&quot;&gt;&#x27; + nf(r.bps / 1e6, r.bps / 1e6 &gt;= 100 ? 0 : 1) + &#x27; Mo/s&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;num&quot;&gt;&#x27; + fmtBytes(r.bps * 3600, mode) + &#x27;&lt;/td&gt;&#x27; +
+      &#x27;&lt;td class=&quot;total&quot;&gt;&lt;div class=&quot;size&quot;&gt;&#x27; + fmtBytes(r.total, mode) + &#x27;&lt;/div&gt;&#x27; + (audioBps ? &#x27;&lt;div class=&quot;withaudio&quot;&gt;avec son : &lt;b&gt;&#x27; + fmtBytes(r.total + audioBps * seconds, mode) + &#x27;&lt;/b&gt;&lt;/div&gt;&#x27; : &#x27;&#x27;) + &#x27;&lt;div class=&quot;bar&quot;&gt;&lt;i style=&quot;width:&#x27; + Math.max(1, r.total / max * 100).toFixed(1) + &#x27;%&quot;&gt;&lt;/i&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&#x27;;
+  });
+  html += &#x27;&lt;/tbody&gt;&lt;/table&gt;&#x27;;
+  $(&#x27;results&#x27;).innerHTML = html;
+}
+
+[&#x27;fps&#x27;, &#x27;size&#x27;, &#x27;units&#x27;, &#x27;audio&#x27;].forEach(id =&gt; { $(id).addEventListener(&#x27;input&#x27;, run); $(id).addEventListener(&#x27;change&#x27;, run); });
+
+// Saisie de la durée façon timecode : le curseur passe à la case suivante quand la valeur est complète.
+const DUR_IDS = [&#x27;dh&#x27;, &#x27;dm&#x27;, &#x27;ds&#x27;, &#x27;df&#x27;];
+function durMax(id) {
+  if (id === &#x27;dh&#x27;) return 99;
+  if (id === &#x27;df&#x27;) return Math.max(0, Math.round(parseFloat($(&#x27;fps&#x27;).value) || 24) - 1);
+  return 59;
+}
+function padDur(el) {
+  el.value = String(Math.min(durMax(el.id), parseInt(el.value, 10) || 0)).padStart(el.id === &#x27;dh&#x27; ? 1 : 2, &#x27;0&#x27;);
+}
+function focusDur(i) {
+  const el = $(DUR_IDS[i]);
+  if (el) { el.focus(); el.select(); }
+}
+DUR_IDS.forEach((id, i) =&gt; {
+  const el = $(id);
+  el.addEventListener(&#x27;focus&#x27;, () =&gt; el.select());
+  el.addEventListener(&#x27;input&#x27;, () =&gt; {
+    el.value = el.value.replace(/\D/g, &#x27;&#x27;).slice(0, 2);
+    const len = el.value.length;
+    const done = id === &#x27;dh&#x27; ? len &gt;= 1 : (len &gt;= 2 || (len === 1 &amp;&amp; parseInt(el.value, 10) * 10 &gt; durMax(id)));
+    if (done &amp;&amp; i &lt; DUR_IDS.length - 1) focusDur(i + 1);
+    run();
+  });
+  el.addEventListener(&#x27;blur&#x27;, () =&gt; { padDur(el); run(); });
+  el.addEventListener(&#x27;keydown&#x27;, e =&gt; {
+    const k = e.key;
+    if ([&#x27;:&#x27;, &#x27;;&#x27;, &#x27;,&#x27;, &#x27;.&#x27;, &#x27; &#x27;, &#x27;Enter&#x27;].includes(k)) {
+      e.preventDefault();
+      if (i &lt; DUR_IDS.length - 1) focusDur(i + 1);
+    } else if (k === &#x27;Backspace&#x27; &amp;&amp; el.value === &#x27;&#x27; &amp;&amp; i &gt; 0) {
+      e.preventDefault();
+      focusDur(i - 1);
+    } else if (k === &#x27;ArrowRight&#x27; &amp;&amp; el.selectionStart === el.value.length &amp;&amp; el.selectionEnd === el.value.length &amp;&amp; i &lt; DUR_IDS.length - 1) {
+      e.preventDefault();
+      focusDur(i + 1);
+    } else if (k === &#x27;ArrowLeft&#x27; &amp;&amp; el.selectionStart === 0 &amp;&amp; el.selectionEnd === 0 &amp;&amp; i &gt; 0) {
+      e.preventDefault();
+      focusDur(i - 1);
+    } else if (k === &#x27;ArrowUp&#x27; || k === &#x27;ArrowDown&#x27;) {
+      e.preventDefault();
+      const max = durMax(id);
+      let v = (parseInt(el.value, 10) || 0) + (k === &#x27;ArrowUp&#x27; ? 1 : -1);
+      if (v &gt; max) v = 0;
+      if (v &lt; 0) v = max;
+      el.value = String(v).padStart(id === &#x27;dh&#x27; ? 1 : 2, &#x27;0&#x27;);
+      el.select();
+      run();
+    }
+  });
+  el.addEventListener(&#x27;paste&#x27;, e =&gt; {
+    const parts = ((e.clipboardData &amp;&amp; e.clipboardData.getData(&#x27;text&#x27;)) || &#x27;&#x27;).match(/\d+/g);
+    if (!parts || parts.length &lt; 2) return;
+    e.preventDefault();
+    parts.slice(0, DUR_IDS.length - i).forEach((p, k) =&gt; { $(DUR_IDS[i + k]).value = p.slice(-2); });
+    DUR_IDS.forEach(d =&gt; padDur($(d)));
+    run();
+  });
+});
+$(&#x27;fps&#x27;).addEventListener(&#x27;change&#x27;, () =&gt; padDur($(&#x27;df&#x27;)));
+
+let tab = &#x27;dnx&#x27;;
+function setTab(t) {
+  tab = t;
+  document.querySelectorAll(&#x27;.tab&#x27;).forEach(b =&gt; b.setAttribute(&#x27;aria-selected&#x27;, String(b.dataset.t === t)));
+  run();
+}
+document.querySelectorAll(&#x27;.tab&#x27;).forEach(b =&gt; b.addEventListener(&#x27;click&#x27;, () =&gt; setTab(b.dataset.t)));
+if (location.hash === &#x27;#prores&#x27;) setTab(&#x27;prores&#x27;); else run();
+&lt;/script&gt;
+
+&lt;/body&gt;&lt;/html&gt;"></iframe></section>
+<footer class="site-foot"><div class="in">
+<p><strong>© 2026 Tous droits réservés.</strong></p>
+<p><button type="button" class="legal-btn" id="legalOpen" aria-haspopup="dialog">Légal</button></p>
+</div></footer>
+<dialog id="legal" aria-labelledby="legalTitle">
+<div class="dlg-head"><h2 id="legalTitle">Légal</h2><button type="button" class="dlg-x" id="legalClose" aria-label="Fermer">&times;</button></div>
+<div class="dlg-body">
+<p><strong>Droit d'auteur.</strong> © 2026 Joël Li. Tous droits réservés. Les outils, leur code, leurs textes et leur interface sont protégés par le droit d'auteur. Toute copie, redistribution, republication, revente ou réutilisation, en tout ou partie, est interdite sans l'accord écrit de l'auteur. L'usage personnel et professionnel du site tel quel est libre.</p>
+<p><strong>Données.</strong> Les fichiers que tu charges restent dans ton navigateur : rien n'est envoyé ni enregistré sur un serveur.</p>
+<p><strong>Garantie.</strong> Les outils sont fournis « tels quels », sans garantie : vérifie toujours les résultats avant de les importer dans un projet de production.</p>
+</div></dialog>
+<script>
+(function(){
+  var HASH={'t-mt':'traceur','t-md':'markerdiff','t-edl':'edl','t-cs':'codec'};
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  function fit(f){
+    try{
+      var d=f.contentDocument; if(!d||!d.documentElement) return;
+      var h=Math.max(d.documentElement.scrollHeight,d.body?d.body.scrollHeight:0);
+      if(h>0) f.style.height=h+'px';
+    }catch(e){}
+  }
+  function wire(f){
+    function go(){
+      fit(f);
+      try{
+        var d=f.contentDocument;
+        if(window.ResizeObserver&&d&&d.body&&!f._ro){f._ro=new ResizeObserver(function(){fit(f)});f._ro.observe(d.body);}
+      }catch(e){}
+    }
+    function hook(){
+      try{
+        var d=f.contentDocument, b=d&&d.getElementById('runBtn');
+        if(!b||b._hooked) return; b._hooked=true;
+        b.addEventListener('click',function(){
+          setTimeout(function(){
+            var r=d.getElementById('results'); if(!r||!r.children.length||r.querySelector('.empty')) return;
+            var bar=document.querySelector('.tabbar').offsetHeight;
+            var y=f.getBoundingClientRect().top+window.pageYOffset+r.getBoundingClientRect().top-bar-140;
+            window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+          },250);
+        });
+      }catch(e){}
+    }
+    f.addEventListener('load',function(){hook()});
+    f.addEventListener('load',go);
+    if(f.contentDocument&&f.contentDocument.readyState==='complete'){hook();go();}
+  }
+  [].forEach.call(document.querySelectorAll('iframe'),wire);
+  function show(id,push){
+    tabs.forEach(function(t){
+      var on=t.id===id;
+      t.setAttribute('aria-selected',on);
+      var p=document.getElementById(t.getAttribute('aria-controls'));
+      p.classList.toggle('on',on);
+      if(on){var f=p.querySelector('iframe'); fit(f); setTimeout(function(){fit(f)},60);}
+    });
+    if(push){try{history.replaceState(null,'','#'+HASH[id]);}catch(e){}}
+    window.scrollTo(0,0);
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){show(t.id,true)});});
+  tabs.forEach(function(t,i){t.addEventListener('keydown',function(e){
+    var n=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:-1;
+    if(n<0||n>=tabs.length) return; e.preventDefault(); tabs[n].focus(); show(tabs[n].id,true);
+  });});
+  window.addEventListener('resize',function(){[].forEach.call(document.querySelectorAll('.panel.on iframe'),fit)});
+  var dlg=document.getElementById('legal');
+  document.getElementById('legalOpen').addEventListener('click',function(){dlg.showModal()});
+  document.getElementById('legalClose').addEventListener('click',function(){dlg.close()});
+  dlg.addEventListener('click',function(e){if(e.target===dlg)dlg.close()});
+  for(var k in HASH){ if(location.hash==='#'+HASH[k]) show(k,false); }
+})();
+</script>
+</body>
+</html>

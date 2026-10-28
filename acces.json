@@ -4,5 +4,9 @@
   },
   "adv-2": {
     "actif": true
+  },
+  "adv-2/yann": {
+    "actif": false,
+    "message": "Ton accès a été retiré."
   }
 }
